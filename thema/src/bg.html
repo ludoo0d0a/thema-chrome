@@ -1,0 +1,275 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>tHema Background</title>
+        <script type="application/javascript" src="lib/jquery-1.4.2.min.js"></script>
+        <script type="application/javascript">
+    
+    chrome.extension.onRequest.addListener(function(a, sender, cb){
+        if (a.message === 'xhr') {
+            request(a, false, cb);
+        } else if (a.message === 'bg-scan') {
+            var id = getUid('scan');
+            setvalue(id, a)
+            openNewPage(a, id);
+        }else if (a.message === 'getdata') {
+			var value =getvalue(a.id);
+			callb(cb, value);
+        } else if (a.message === 'open') {
+			callb(cb, openprofile(a));
+        } else if (a.message === 'save') {
+			callb(cb, saveprofile(a));
+        } else if (a.message === 'bg-apply') {
+			//send ok to popup
+        } else if (a.message === 'new') {
+			a.data= a.data||{};
+			callb(cb, saveprofile(a));
+        } else if (a.message === 'del') {
+			callb(cb, delprofile(a));
+        } else if (a.message === 'profiles') {
+			var profiles =getvalue('profiles', {});
+			callb(cb, profiles);
+        } else if (a.message === 'dataprofiles') {
+			var profiles =getvalue('profiles', {});
+			var p = {};
+			$.each(profiles, function(id,name){
+				p[id]=openprofileid(id)
+			});
+			callb(cb, p);
+        } 
+		/*
+		else if (a.message === 'badge') {
+            updateBadge(a, callback);
+        } */
+    });
+	
+	
+	function getvalue(name, defaut){
+		var o = localStorage.getItem(name);
+		var value=o;
+		//try {
+			if (o) {
+				value = JSON.parse(o);
+			}
+		//}catch(){}
+		return value||defaut;
+	}
+	function delvalue(name){
+		localStorage.removeItem(name);
+	}
+	
+	function setvalue(name, value){
+		var v = value;
+		if (typeof value ==='object'){
+			v = JSON.stringify(value);
+		}
+		localStorage.setItem(name, v);
+	}
+	
+	function openprofile(a){
+		a.data = a.data||{};
+		return openprofileid(a.id);
+	}
+	function openprofileid(id){
+		return getvalue('profile_'+id);
+	}
+	
+	function delprofile(a){
+		var o = delvalue('profile_'+a.id);
+		
+		var values = getvalue('profiles', {});
+		delete values[a.id];
+		setvalue('profiles', values);
+		
+		return o;
+	}
+	
+	
+	function saveprofile(a){
+		if (a.data && a.id) {
+			setvalue('profile_' + a.id, a.data);
+
+			var values = getvalue('profiles', {});
+			values[a.id]=a.data.name||'';
+			setvalue('profiles', values);
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	function getUid(prefix){
+		var s = [];
+		if (prefix) {
+			s.push(prefix);
+		}
+		for (var i = 0; i <5; i++) s[i] = Math.floor(Math.random()*0x10);
+		return s.join('');
+	}
+    
+    function openNewPage(a, id){
+        chrome.tabs.getSelected(null, function(tab){
+            var oldUrl = tab.url;
+            var blankUrl = chrome.extension.getURL('blank.html');
+            blankUrl += '#' + id;
+            chrome.tabs.create({
+                url: blankUrl,
+                index: tab.index + 1
+            }, function(tab){
+                var tabs = chrome.extension.getExtensionTabs();
+                for (var i = 0; i < tabs.length; i++) {
+                    var tab = tabs[i];
+                    if (tab.location.href == blankUrl && !tab.dataAlreadySet) {
+						tab.printSource(a);
+                        tab.dataAlreadySet = true;
+                        break;
+                    }
+                }
+            });
+        });
+    }
+    /*
+    function updateprefs(a, cb){
+        if (a.badge) {
+            prefs = getPrefs();
+            if (a.badge.id) {
+                prefs.badge.id = a.badge.id;
+            }
+            if (a.badge.interval) {
+                prefs.badge.interval = a.badge.interval;
+            }
+            setPrefs(prefs);
+            newTictac(true);
+            cb(prefs);
+        }
+    }
+    
+    function setPrefs(prefs, cleanall){
+        if (cleanall) {
+            localStorage.clear();
+        }
+        localStorage.setItem('prefs', JSON.stringify(prefs));
+    }
+    
+    function getPrefs(){
+        var id;
+        var textPrefs = localStorage.getItem('prefs');
+        var prefs = (textPrefs) ? JSON.parse(textPrefs) : false;
+        //prefs = checkPrefs(prefs);
+        return prefs;
+    }
+    
+    function getPref(option){
+        if (prefs && typeof prefs[option] !== "undefined") {
+            return prefs[option];
+        } else {
+            return false;
+        }
+    }
+    
+    function updateBadge(a, cb){
+        //Send time to badge
+        var time = parseInt(a.time, 10);
+        
+        var limit = getLimits(a.id);
+        
+        var color = 'Green';
+        var bcolor = [0, 255, 0, 255];
+        if (time > limit.red) {
+            color = 'Red';
+            bcolor = [255, 0, 0, 255];
+        } else if (time > limit.orange) {
+            color = 'Orange';
+            bcolor = [255, 143, 53, 255];
+        }
+        chrome.browserAction.setBadgeText({
+            text: '' + time
+        });
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: bcolor
+        });
+        var icon = 'images/16/Box_' + color + '.png';
+        chrome.browserAction.setIcon({
+            path: icon
+        });
+        
+        var title = '' + timeMappings[a.id].text + '\n' + time + ' minutes';
+        chrome.browserAction.setTitle({
+            title: title
+        });
+        
+        if (cb) {
+            cb(null);
+        }
+    }
+    */
+    function xhr(a, cb){
+        request(a, true, cb);
+    }
+    
+    function request(a, local, cb){
+        var xhr = new XMLHttpRequest();
+        var method = a.method || 'get';
+        var url = a.url;
+        if (a.parameters && (method.toLowerCase() == 'get')) {
+            var params = [];
+            for (var k in a.parameters) {
+                params.push(k + '=' + encodeURIComponent(a.parameters[k]));
+            }
+            var sep = (url.indexOf('?') > 0) ? '&' : '?';
+            url += sep + params.join('&');
+        }
+        xhr.open(a.method || 'get', url, true);
+        //headers
+        if (a.headers) {
+            for (var kh in a.headers) {
+                xhr.setRequestHeader(kh, a.headers[kh]);
+            }
+        }
+        if (cb) {
+            a.onreadystatechange = true;//Chrome extesnion looks on readystatechange
+        }
+        xhr.onreadystatechange = function(o){
+            if (xhr.readyState == 4) {
+                var responseJson = false;
+                if (a.dataType === 'xml' && xhr.responseXML) {
+                    responseJson = xml2json(xhr.responseXML, '');
+                }
+                cb({
+                    responseJson: responseJson,
+                    responseText: xhr.responseText,
+                    responseHeaders: xhr.responseHeaders,
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    request: a
+                });
+            }
+        };
+        try {
+            xhr.send(a.data || {});
+        } catch (e) {
+            var o = {
+                responseText: e.message || 'Error',
+                status: (e.name || '') + ' ' + (e.code || 0),
+                statusText: (e.name || '') + ' ' + (e.code || 0),
+                error: e
+            };
+            if (local && typeof a.onerror === "function") {
+                a.onerror.call(this, o);
+            } else {
+                cb(o);
+            }
+        }
+    }
+    
+    function callb(cb, data){
+        if (cb && typeof cb === 'function') {
+            cb(data || null);
+        }
+    }
+        </script>
+    </head>
+    <body>
+        <!--canvas id="canvas" width="19" height="19"></canvas-->
+    </body>
+</html>
