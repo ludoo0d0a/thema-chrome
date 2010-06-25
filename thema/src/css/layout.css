@@ -36,3 +36,13 @@ ol{
  */
 form p { position:relative }
 label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
+
+/**
+ * 
+ */
+.txta{
+	border:1px solid #ddd;
+	padding-left:20px;
+	height:150px;
+	width:320px;
+}

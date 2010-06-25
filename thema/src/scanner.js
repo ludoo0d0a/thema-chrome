@@ -33,7 +33,10 @@ chrome.extension.onConnect.addListener(function(port){
 function apply(options, cb){
 	//console.log('fn scanner.apply');
 	addStyle(options.css, 'thcss'||options.id, true);
-	addScript(options.js, 'thjs'||options.id, true);
+	addJquery();
+	
+	var js = "jQuery(document).ready(function(){"+options.js+"})";
+	addScript(js, 'thjs'||options.id, true);
 }
 
 function savepage(options, cb){
