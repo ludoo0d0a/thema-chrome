@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>tHema menu</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link type="text/css" href="popup.css" rel="stylesheet">
+        <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/infield/labels.css" />
+        <script type="text/javascript" src="lib/infield/jquery.infieldlabel.js"></script>
+		<script type="text/javascript" src="lib/message/jquery.message.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="lib/message/jquery.message.css" />
+        <script type="text/javascript" src="lib/sexycombo/jquery.sexy-combo.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy-combo.css" />
+        <link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy/sexy.css">
+		<link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy/sexy-large.css">
+		<script type="text/javascript" src="lib/com.js"></script>
+		<link id="bespin_base" href="lib/bespin"/>
+		<link rel="stylesheet" type="text/css" href="lib/bespin/BespinEmbedded.css">
+		<script type="text/javascript" src="lib/bespin/BespinEmbedded.js"></script>
+        <script type="text/javascript" src="popup.js"></script>
+    </head>
+    <body onload="init();">
+        <div id="main">
+            <form>
+				<div id="profile">
+                    <div id="ctn-profile">
+                    </div>
+                    <div id="btn-new" class="btn-small newprofile cursor">
+                        New
+                    </div>
+					<div id="btn-del" class="btn-small delprofile cursor">
+                        Del
+                    </div>
+                </div>
+                <ol>
+                    <li>
+                        <p><label class="lbl" for="tx_url">Url filter</label><input title="Url filter" size="48" type="text" id="tx_url"/></p>
+                    </li>
+                    <li>
+                        <p><label class="lbl" for="tx_css">CSS</label><textarea title="CSS" id="tx_css" rows="10" cols="60" class="txta" data-bespinoptions='{ "syntax": "css" }'></textarea></p>
+                    </li>
+                    <li>
+                        <p><label class="lbl" for="tx_js">Javascript</label><textarea title="Javascript" id="tx_js" rows="10" cols="60" class="txta" data-bespinoptions='{ "syntax": "js" }'></textarea></p>
+                    </li>
+                </ol>
+            </form>
+			<div id="btn-apply" class="button cursor">
+                   Apply changes
+            </div>
+            <div id="btn-save" class="button cursor">
+                Save
+            </div>
+			<div id="btn-auto" class="button cursor">
+                Auto
+            </div>
+			<div id="btn-css" class="button cursor">
+                Get CSS
+            </div>
+        </div>
+        <div id="output">
+        </div>
+    </body>
+</html>
