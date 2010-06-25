@@ -13,6 +13,26 @@
  });
  });
  */
+
+
+/**
+ * Samples of monitoring (ala Aardvardk)
+ */
+/*
+$jQ('div').hover(function(){
+$jQ(this).css('border', '1px solid red');
+},function(){
+$jQ(this).css('border', '');
+});
+*/
+function addJquery(){
+	var url = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js';
+	addScript(url, 'jq');
+	
+	var js= "var $jQ=jQuery;jQuery.noConflict();";
+	addScript(js, 'jq0', true);
+}
+
 function abanti(){
     //128x1024 ok 65%
     //1024x768 ok 55%
@@ -57,35 +77,46 @@ function setval(el, text, astext){
 var PREFIX = '__tHema_';
 function addStyle(styles, lid, astext){
     var id = PREFIX + lid;
-    var css = $('#' + id);
-    if (css && css.length > 0) {
-        setval(css, styles, astext);
+    var el = $('#' + id);
+    if (el && el.length > 0) {
+        setval(el, styles, astext);
     } else {
         if (astext) {
-            css = $('<style type="text/css"></style>');
+            el = $('<style type="text/css"></style>');
         } else {
-            css = $('<link type="text/css" rel="stylesheet"></link>');
+            el = $('<link type="text/css" rel="stylesheet"></link>');
         }
         if (id) {
-            css.attr('id', id);
+            el.attr('id', id);
         }
-        setval(css, styles, astext);
-        css.appendTo($('head'));
+       
+		if (astext) {
+        el.text(styles);
+    } else {
+        el.attr('href', styles);
+    }
+		
+        el.appendTo($('head'));
     }
 }
 
 function addScript(scripts, lid, astext){
     var id = PREFIX + lid;
-    var script = $('#' + id);
-    if (script && script.length > 0) {
-        script.remove();
+    var el = $('#' + id);
+    if (el && el.length > 0) {
+        el.remove();
     }
     
-    script = $('<script type="text/javascript"></script>');
+    el = $('<script type="text/javascript"></script>');
     if (id) {
-        script.attr('id', id);
+        el.attr('id', id);
     }
-    setval(script, scripts, astext);
-    script.appendTo($('head'));
+	if (astext) {
+        el.text(scripts);
+    } else {
+        el.attr('src', scripts);
+    }
+	
+    el.appendTo($('head'));
     
 }
