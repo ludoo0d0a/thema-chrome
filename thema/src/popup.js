@@ -23,39 +23,49 @@ function init(){
     $('#btn-new').click(newprofile);
     $('#btn-del').click(delprofile);
     $('#btn-auto').click(toggleauto);
-    initbespin({
-        'tx_css': {
-            syntax: "css"
-        },
-        'tx_js': {
-            syntax: "js"
-        }
-    });
+    inittab();    
 }
 
 var editor, editorId;
-function setbespin(id, config){
-    var ed = $('div.bespin'), txt = ed.prev(), oldvalue = editor ? editor.value : '', newvalue = $('#' + id).val();
+function setbespin(id, config, title){
+    var ed = $('div.bespin'), txt = $('#editor'), oldvalue = editor ? editor.value : '', newvalue = $('#' + id).val();
     var o = config || {};
     o.stealFocus = true;
     bespin.useBespin(id, o).then(function(env){
         env.settings.set("fontsize", 10);
-		editor = env.editor;
+        editor = env.editor;
     });
-    editor.value = newvalue;
+	if (editor) {
+		editor.value = newvalue;
+	}
     
     ed.remove();
     txt.val(oldvalue);
-    txt.show();
-	editorId=id;
+	if (title) {
+		txt.attr('title', title);
+	}
+    //txt.show();
+    editorId = config.syntax;
+}
+
+function toggleeditor(syntax){
+    setbespin('editor', {
+        syntax: syntax,
+		height:600
+    }, syntax);
 }
 
 function updatevalue(){
-	if (editor) {
-		$('#' + editorId).val(editor.value);
-	}
+    if (editor) {
+        $('#tx_' + editorId).val(editor.value);
+    }
 }
 
+function updateeditor(){
+    if (editor) {
+        editor.value=$('#tx_' + editorId).val();
+    }
+}
 
 function initbespin(configs){
     $.each(configs, function(id, config){
@@ -118,7 +128,7 @@ function loadCombo(selected){
 }
 
 function getcss(){
-	var options = {
+    var options = {
         images: $('#chk_save_images').val(),
         css: $('#chk_save_css').val()
     };
@@ -145,18 +155,21 @@ function setData(data){
     $('#tx_url').val(data.url || '');
     $('#tx_js').val(data.js || '');
     $('#tx_css').val(data.css || '');
+	updateeditor();
 }
 
 function delprofile(){
-    var id = $('#selprofile').val();
-    var sibling = $('#selprofile :selected').prev() || $('#selprofile :selected').next();
     var name = $('#selprofile :selected').text();
-    req('del', function(){
-        loadCombo(sibling.val());
-        $().message("Profile " + name + " deleted!");
-    }, {
-        id: id
-    });
+	if (confirm("Are you sure to delete Profile " + name + "?")) {
+		var id = $('#selprofile').val();
+		var sibling = $('#selprofile :selected').prev() || $('#selprofile :selected').next();
+		req('del', function(){
+			loadCombo(sibling.val());
+			$().message("Profile " + name + " deleted!");
+		}, {
+			id: id
+		});
+	}
 }
 
 function logme(){
@@ -172,10 +185,9 @@ function saveprofile(){
     savemyprofile(id, name, getData());
 }
 
-function newprofile(pname){
+function newprofile(){
     var count = $('#selprofile option').length + 1;
-    var name = pname || 'My profile ' + count;
-    var id = 'p' + count;
+    var name = 'My profile ' + count;
     savemyprofile(null, name, {});
 }
 
@@ -187,6 +199,7 @@ function savemyprofile(id, name, data){
     o.data.name = name;
     if (!o.id) {
         //new
+		var count = $('#selprofile option').length + 1;
         o.id = 'p' + count;
         req('new', function(status){
             if (status) {
@@ -216,8 +229,8 @@ function applyprofile(){
 function openprofile(id){
     console.log('open ask ' + id);
     req('open', function(data){
-        //console.log('open response');
-        //console.log(data);
+        console.log('open response');
+        console.log(data);
         data = data || {};
         setData(data);
         $(".lbl").hide();
@@ -228,3 +241,33 @@ function openprofile(id){
 }
 
 
+
+
+/**
+ * Tab
+ */
+function inittab(){
+    window.onBespinLoad = function(){
+        togglebtn('css', true);
+        togglebtn('js', false);
+    }
+    $('#btn-codecss').click(function(){
+        togglebtn('css', true);
+        togglebtn('js', false);
+    });
+    $('#btn-codejs').click(function(){
+        togglebtn('js', true);
+        togglebtn('css', false);
+    });
+}
+
+function togglebtn(id, show){
+    if (show) {
+        //$('#code' + id).show();
+        $('#btn-code' + id).addClass('active');
+        toggleeditor(id);
+    } else {
+        //$('#code' + id).hide();
+        $('#btn-code' + id).removeClass('active');
+    }
+}

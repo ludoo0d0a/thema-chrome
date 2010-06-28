@@ -1,5 +1,5 @@
 #main {
-    width:330px;
+    width:400px;
     height:100px;
 	margin:5px;
 }
@@ -20,6 +20,10 @@ ol{
 #ctn-profile{
 	float:left;
 	width:220px;
+}
+#ctn-filter{
+	float:left;
+	width:180px;
 }
 #profile{
 	width:100%;
@@ -43,6 +47,12 @@ label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
 .txta{
 	border:1px solid #ddd;
 	padding-left:20px;
-	height:150px;
-	width:320px;
+	height:400px;
+	width:400px;
+}
+
+#tabs_code{
+	height:20px;
+	float:right;
+	width:75px;
 }
