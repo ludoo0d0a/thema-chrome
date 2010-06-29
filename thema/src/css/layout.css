@@ -20,10 +20,11 @@ ol{
 #ctn-profile{
 	float:left;
 	width:220px;
+	height: 20px;
 }
 #ctn-filter{
 	float:left;
-	width:180px;
+	width:320px;
 }
 #profile{
 	width:100%;
@@ -55,4 +56,9 @@ label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
 	height:20px;
 	float:right;
 	width:75px;
+}
+
+#changed{
+	color:#fff;
+	display:inline;
 }
