@@ -22,8 +22,7 @@
         } else if (a.message === 'bg-apply') {
 			//send ok to popup
         } else if (a.message === 'new') {
-			a.data= a.data||{};
-			callb(cb, saveprofile(a));
+			newprofile(a, cb);
         } else if (a.message === 'del') {
 			callb(cb, delprofile(a));
         } else if (a.message === 'profiles') {
@@ -72,6 +71,36 @@
 	}
 	function openprofileid(id){
 		return getvalue('profile_'+id);
+	}
+
+	function newprofile(a, cb, url){
+		if (!url){
+			return getUrl(function(uri){
+				newprofile(a, cb, uri);
+			});
+		}
+		
+		a=a ||{};
+		a.data= a.data||{};
+		var o=true, id = 0;
+		while (o) {
+			o = getvalue('profile_p' + ++id, false);
+		}
+		
+		console.log('profile '+id+'is empty');
+		
+		var p = {
+			id:'p' + id,
+			data:{
+				name: 'My profile ' + id,
+				url:url,
+				js:'/* Empty js code */',
+				css:'/* Empty CSS stylesheet */'
+			}
+		};
+		
+		saveprofile(p);
+		callb(cb,p);
 	}
 	
 	function delprofile(a){
@@ -128,6 +157,13 @@
             });
         });
     }
+	
+function getUrl(cb){
+    chrome.tabs.getSelected(null, function(tab){
+            cb(tab.url);
+    });
+}
+
     /*
     function updateprefs(a, cb){
         if (a.badge) {

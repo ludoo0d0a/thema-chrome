@@ -40,6 +40,12 @@ function executeScript(file){
     });
 }
 
+function getUrl(cb){
+    chrome.tabs.getSelected(null, function(tab){
+            cb(tab.url);
+    });
+}
+
 function isUrl(url){
     return (new String(url)).match(/^https?:\/\//i) ? true : false;
 }
