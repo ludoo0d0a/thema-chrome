@@ -29,8 +29,8 @@ function init(){
 var editor, editorId;
 function setbespin(id, config, title){
     var ed = $('div.bespin'), txt = $('#editor'), oldvalue = editor ? editor.value : '';
-	//var newvalue = $('#' + id).val();
-	var newvalue = $('#tx_' + config.syntax).val();
+    //var newvalue = $('#' + id).val();
+    var newvalue = $('#tx_' + config.syntax).val();
     var o = config || {};
     o.stealFocus = true;
     bespin.useBespin(id, o).then(function(env){
@@ -45,7 +45,7 @@ function setbespin(id, config, title){
             editor._textChanged = true;
         }
         editor.value = newvalue;
-		$('#changed').hide();
+        $('#changed').hide();
     });
     
     ed.remove();
@@ -154,7 +154,8 @@ function getcss(){
 }
 
 function getData(){
-    return {
+    updatevalue();
+	return {
         name: $('#selprofile :selected').text(),
         url: $('#tx_url').val(),
         js: $('#tx_js').val(),
@@ -168,35 +169,13 @@ function setData(data){
     $('#tx_css').val(data.css || '');
     updateeditor();
     
-    /*
-    
-     
-    
-     if (!data.css && editorId=='css'){
-    
-     
-    
-     //set focus on js
-    
-     
-    
-     setTab(true);
-    
-     
-    
-     }else if (!data.js && editorId=='js'){
-    
-     
-    
-     //set focus on css
-    
-     
-    
-     setTab(false);
-    
-     
-    
-     }*/
+    if (!data.css && editorId == 'css') {
+        //set focus on js
+        setTab(true);
+    } else if (!data.js && editorId == 'js') {
+        //set focus on css
+        setTab(false);
+    }
     
 }
 
@@ -250,6 +229,7 @@ function savemyprofile(id, name, data){
         //save
         req('save', function(){
             $().message("Profile " + name + " saved!");
+			$('#changed').hide();
         }, o);
     }
 }

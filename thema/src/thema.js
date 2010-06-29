@@ -1,70 +1,101 @@
-/*chrome.extension.onConnect.addListener(function(port){
- port.onMessage.addListener(function(msg){
- switch (msg) {
- case 'abanti':
- abanti();
- chrome.extension.sendRequest({
- msg: 'view-scripts',
- inline: inlineScripts,
- external: externalScripts
- });
- break;
- }
- });
- });
- */
+var aliases = {
+    jquery: [{
+        id: 'jq',
+        js: 'http://ajax.googleapis.com/ajax/libs/jquery/$version/jquery.min.js',
+        jsx: "var tHema=tHema||{};tHema.waitjQuery=function(){console.log('in wait jquery');if(typeof jQuery==='undefined'){console.log('wait jquery');window.setTimeout(function(){console.log('recall waitjQuery');tHema.waitjQuery()},100)}else{console.log('jQuery.noConflict');jQuery.noConflict();if(tHema.onLoad){console.log('tHema.onLoad');tHema.onLoad()}else{console.log('ERROR tHema.onLoad');console.error('tHema.onLoad not found')}}};console.log('first call waitjQuery');tHema.waitjQuery();"
+    }],
+    jqueryui: [{
+        id: 'jqui',
+        js: "http://ajax.googleapis.com/ajax/libs/jqueryui/$version/jquery-ui.min.js",
+        css: "http://ajax.googleapis.com/ajax/libs/jqueryui/$version/themes/base/jquery-ui.css"
+    }],
+    prototype: [{
+        id: 'prototype',
+        js: "http://ajax.googleapis.com/ajax/libs/prototype/$version/prototype.js"
+    }],
+    scriptaculous: [{
+        id: 'scriptaculous',
+        js: "http://ajax.googleapis.com/ajax/libs/scriptaculous/$version/scriptaculous.js"
+    }],
+    yui: [{
+        id: 'yui',
+        js: "http://ajax.googleapis.com/ajax/libs/yui/$version/build/yuiloader/yuiloader-min.js"
+    }],
+    mootools: [{
+        id: 'mootools',
+        js: "http://ajax.googleapis.com/ajax/libs/mootools/$version/mootools-yui-compressed.js"
+    }],
+    dojo: [{
+        id: 'dojo',
+        js: "http://ajax.googleapis.com/ajax/libs/dojo/$version/dojo/dojo.xd.js"
+    }],
+    extjs: [{
+        id: 'extjs',
+        js: "http://ajax.googleapis.com/ajax/libs/ext-core/$version/ext-core.js",
+        css: "http://extjs.cachefly.net/ext-$version/resources/css/ext-all.css"
+    }]
+
+};
+
+var reRequire = /\/\/\s*@require\s+([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)\/\//;
+//@require jquery 1.4.2 jq $
+//@require http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js jq
+function autoUpdate(coda, asjs){
+    var alias, code = coda;
+    var m = reRequire.exec(code);
+    if (m) {
+        var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
+        console.log('require ' + url);
+        if (asjs) {
+            //could be an alias
+            var alias = aliases[url];
+            if (alias) {
+                addLibraries(alias, version, shortcut);
+            } else {
+                addScript(url, id);
+            }
+        } else {
+            addStyle(url, id);
+        }
+        
+        //code =  "jQuery(document).ready(function(){"+js+"})";
+        //code =  "$(function(){"+js+"})";
+    }
+    return code;
+}
 
 
 /**
  * Samples of monitoring (ala Aardvardk)
  */
 /*
-$jQ('div').hover(function(){
-$jQ(this).css('border', '1px solid red');
-},function(){
-$jQ(this).css('border', '');
-});
-*/
-function addJquery(){
-	var url = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js';
-	addScript(url, 'jq');
-	
-	var js= "var $jQ=jQuery;jQuery.noConflict();";
-	addScript(js, 'jq0', true);
-}
-
-function abanti(){
-    //128x1024 ok 65%
-    //1024x768 ok 55%
-    var pos = $('.timesheetCalendar td.today:first').prevAll().length;
-    var styles = [{
-        url: 'abanti.sogeti.be/abanti/',
-        css: '.divScroll{overflow:auto;width:55%;}' +
-        '#divTimesheet{width:auto;}' +
-        '.timesheetEntry{padding:0px;}' +
-        '.timesheetCalendar tr td.timesheetEntry:nth-child(' +
-        (pos + 1) +
-        '){background: #C7EEC1;}' +
-        '.header_container, .inner h3{display:none;}' +
-        '.inner{padding:0px}' +
-        '#primaryContent{padding:0px}' +
-        '.outer{margin:0px}' +
-        '.header_menu{top:0px;}'
-    }];
+ $jQ('div').hover(function(){
+ $jQ(this).css('border', '1px solid red');
+ },function(){
+ $jQ(this).css('border', '');
+ });
+ */
+function addLibraries(alias, version, shortcut){
+    version = version || '1';
+    shortcut = shortcut || '$';
     
-    var url = window.location.href;
-    $.each(styles, function(i, o){
-        var r = new RegExp(o.url, 'i');
-        if (r.test(url)) {
-            addStyle(o.css);
+    $.each(alias, function(i, o){
+        var url, code;
+        if (o.css) {
+            url = o.css.replace('$version', version);
+            addStyle(url, o.id);
+        }
+        if (o.js) {
+            url = o.js.replace('$version', version);
+            addScript(url, o.id);
+        }
+        if (o.jsx) {
+            code = o.jsx.replace('$shortcut', shortcut);
+            addScript(code, o.id + 'x', true);
         }
     });
-    
-    $('<a href="#">Unlock</a>').insertAfter('#divSave').bind('click', function(){
-        $('input:disabled').removeAttr('disabled');
-    });
-    
-};
+}
+
 
 function setval(el, text, astext){
     if (astext) {
@@ -89,13 +120,13 @@ function addStyle(styles, lid, astext){
         if (id) {
             el.attr('id', id);
         }
-       
-		if (astext) {
-        el.text(styles);
-    } else {
-        el.attr('href', styles);
-    }
-		
+        
+        if (astext) {
+            el.text(styles);
+        } else {
+            el.attr('href', styles);
+        }
+        
         el.appendTo($('head'));
     }
 }
@@ -111,12 +142,12 @@ function addScript(scripts, lid, astext){
     if (id) {
         el.attr('id', id);
     }
-	if (astext) {
+    if (astext) {
         el.text(scripts);
     } else {
         el.attr('src', scripts);
     }
-	
+    
     el.appendTo($('head'));
     
 }
