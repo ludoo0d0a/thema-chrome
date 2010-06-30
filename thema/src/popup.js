@@ -35,6 +35,10 @@ function setbespin(id, config, title){
     o.stealFocus = true;
     bespin.useBespin(id, o).then(function(env){
         env.settings.set("fontsize", 10);
+		env.settings.set("tabstop", 3);
+		env.settings.set("autoindent", true);
+		env.settings.set("codecomplete", true);
+		env.settings.set("completewithspace", true);
         editor = env.editor;
         if (!editor._textChanged) {
             editor.textChanged.add(function(oldRange, newRange, newVal){
