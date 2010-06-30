@@ -33,8 +33,12 @@ var aliases = {
         id: 'extjs',
         js: "http://ajax.googleapis.com/ajax/libs/ext-core/$version/ext-core.js",
         css: "http://extjs.cachefly.net/ext-$version/resources/css/ext-all.css"
+    }],
+	jlinq: [{
+        id: 'extjs',
+		last:'2.2.1',
+        js: "http://www.hugoware.net/Downloads/Get/jLinq-$version.js"        
     }]
-
 };
 
 var reRequire = /\/\/\s*@require\s+([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)\/\//;
@@ -76,7 +80,7 @@ function autoUpdate(coda, asjs){
  });
  */
 function addLibraries(alias, version, shortcut){
-    version = version || '1';
+    version = version || alias.last || '1';
     shortcut = shortcut || '$';
     
     $.each(alias, function(i, o){
@@ -105,49 +109,63 @@ function setval(el, text, astext){
     }
 }
 
+var modebg=false;
 var PREFIX = '__tHema_';
-function addStyle(styles, lid, astext){
-    var id = PREFIX + lid;
-    var el = $('#' + id);
-    if (el && el.length > 0) {
-        setval(el, styles, astext);
-    } else {
-        if (astext) {
-            el = $('<style type="text/css"></style>');
-        } else {
-            el = $('<link type="text/css" rel="stylesheet"></link>');
-        }
-        if (id) {
-            el.attr('id', id);
-        }
-        
-        if (astext) {
-            el.text(styles);
-        } else {
-            el.attr('href', styles);
-        }
-        
-        el.appendTo($('head'));
-    }
+function addStyle(styles, lid, astext, cb){
+	if (modebg) {
+		var o=(astext)?{code:styles}:{file:styles};
+		o.tab=mytabId;
+		req('addcss', cb, o);
+	} else {
+		var id = PREFIX + lid;
+		var el = $('#' + id);
+		if (el && el.length > 0) {
+			setval(el, styles, astext);
+		} else {
+			if (astext) {
+				el = $('<style type="text/css"></style>');
+			} else {
+				el = $('<link type="text/css" rel="stylesheet"></link>');
+			}
+			if (id) {
+				el.attr('id', id);
+			}
+			
+			if (astext) {
+				el.text(styles);
+			} else {
+				el.attr('href', styles);
+			}
+			
+			el.appendTo($('head'));
+		}
+	}
 }
 
-function addScript(scripts, lid, astext){
-    var id = PREFIX + lid;
-    var el = $('#' + id);
-    if (el && el.length > 0) {
-        el.remove();
-    }
-    
-    el = $('<script type="text/javascript"></script>');
-    if (id) {
-        el.attr('id', id);
-    }
-    if (astext) {
-        el.text(scripts);
-    } else {
-        el.attr('src', scripts);
-    }
-    
-    el.appendTo($('head'));
+function addScript(scripts, lid, astext, cb){
+    console.log('addScript '+scripts);
+	if (modebg) {
+		var o= (astext) ? {code: scripts} : {file: scripts};
+		o.tab=mytabId;
+		req('addjs', cb, o);
+	} else {
+		var id = PREFIX + lid;
+		var el = $('#' + id);
+		if (el && el.length > 0) {
+			el.remove();
+		}
+		
+		el = $('<script type="text/javascript"></script>');
+		if (id) {
+			el.attr('id', id);
+		}
+		if (astext) {
+			el.text(scripts);
+		} else {
+			el.attr('src', scripts);
+		}
+		
+		el.appendTo($('head'));
+	}
     
 }
