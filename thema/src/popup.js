@@ -155,7 +155,7 @@ function getcss(){
 
 function getData(){
     updatevalue();
-	return {
+    return {
         name: $('#selprofile :selected').text(),
         url: $('#tx_url').val(),
         js: $('#tx_js').val(),
@@ -229,7 +229,7 @@ function savemyprofile(id, name, data){
         //save
         req('save', function(){
             $().message("Profile " + name + " saved!");
-			$('#changed').hide();
+            $('#changed').hide();
         }, o);
     }
 }
@@ -240,7 +240,7 @@ function applyprofile(){
     }, {
         id: $('#selprofile').val(),
         data: getData()
-    })
+    });
 }
 
 function openprofile(id){

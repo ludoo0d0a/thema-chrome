@@ -4,8 +4,8 @@
         <title>tHema Background</title>
         <script type="application/javascript" src="lib/jquery-1.4.2.min.js"></script>
         <script type="application/javascript">
-            
             chrome.extension.onRequest.addListener(function(a, sender, cb){
+                console.log('get bg message ' + a.message);
                 if (a.message === 'xhr') {
                     request(a, false, cb);
                 } else if (a.message === 'bg-scan') {
@@ -35,6 +35,10 @@
                         p[id] = openprofileid(id)
                     });
                     callb(cb, p);
+                } else if (a.message === 'addjs') {
+                    addjs(a, cb);
+                } else if (a.message === 'addcss') {
+                    addcss(a, cb);
                 }
                 /*
                  else if (a.message === 'badge') {
@@ -88,26 +92,28 @@
                 while (o) {
                     o = getvalue('profile_p' + ++id, false);
                 }
-
-				function gonewprofile(xhr){
-					var js = "//@require jquery //\ntHema.onLoad=function(){\n\tjQuery(document).ready(function(){\n\t\tconsole.log('jQuery loaded!!');\n\t\tjQuery(document.body).children().fadeOut(2000, function(){jQuery(document.body).children().fadeIn(2000);});\n\t});\n}\n";
-					if (xhr && xhr.responseText){
-						js = xhr.responseText;
-					}
-					var p = {
-						id: 'p' + id,
-						data: {
-							name: 'My profile ' + id,
-							url: url,
-							js: js,
-							css: '/* Empty CSS stylesheet */'
-						}
-					};
-					saveprofile(p);
-					callb(cb, p);
-				}
-				request({url:'res/jquery.js'}, true, gonewprofile);
-				gonewprofile();
+                
+                function gonewprofile(xhr){
+                    var js = "//@require jquery //\ntHema.onLoad=function(){\n\tjQuery(document).ready(function(){\n\t\tconsole.log('jQuery loaded!!');\n\t\tjQuery(document.body).children().fadeOut(2000, function(){jQuery(document.body).children().fadeIn(2000);});\n\t});\n}\n";
+                    if (xhr && xhr.responseText) {
+                        js = xhr.responseText;
+                    }
+                    var p = {
+                        id: 'p' + id,
+                        data: {
+                            name: 'My profile ' + id,
+                            url: url,
+                            js: js,
+                            css: '/* Empty CSS stylesheet */'
+                        }
+                    };
+                    saveprofile(p);
+                    callb(cb, p);
+                }
+                request({
+                    url: 'res/jquery.js'
+                }, true, gonewprofile);
+                gonewprofile();
             }
             
             function delprofile(a){
@@ -247,6 +253,34 @@
              }
              }
              */
+            function addjs(o, cb){
+                console.log('addjs:');
+                console.log(o);
+                if (o.code || o.file) {
+                    var a = {
+                        code: o.code,
+                        file: o.file
+                    };
+                    chrome.tabs.getSelected(null, function(tab){
+                        chrome.tabs.executeScript(o.tab || tab.id, a, cb);
+                    });
+                }
+            }
+            
+            function addcss(o, cb){
+                console.log('addcss:');
+                console.log(o);
+                if (o.code || o.file) {
+                    var a = {
+                        code: o.code,
+                        file: o.file
+                    };
+                    chrome.tabs.getSelected(null, function(tab){
+                        chrome.tabs.insertCSS(o.tab || tab.id, a, cb);
+                    });
+                }
+            }
+            
             function xhr(a, cb){
                 request(a, true, cb);
             }

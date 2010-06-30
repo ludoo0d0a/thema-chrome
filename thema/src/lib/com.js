@@ -1,33 +1,36 @@
 var isChrome = (typeof chrome !== 'undefined'), cbo, profiles = [];
 
+var emptyFn = function(){};
 function req(message, cb, data){
     if (isChrome && chrome.extension) {
         var o = data || {};
         o.message = message;
-        chrome.extension.sendRequest(o, cb);
-    }     
+        console.log('send req '+message);
+		chrome.extension.sendRequest(o, cb||emptyFn);
+    }
 }
 
 /*
- function inject(message, cb, data){
- chrome.tabs.getSelected(null, function(tab){
- var bkg = chrome.extension.getBackgroundPage();
- chrome.tabs.executeScript(tab.id, 'scanner.js', funtion(){
- bkg.storage.getItem('scanner-values');
- });
- });
- }*/
+function inject(message, cb, data){
+    chrome.tabs.getSelected(null, function(tab){
+        var bkg = chrome.extension.getBackgroundPage();
+        chrome.tabs.executeScript(tab.id, 'scanner.js', function(){
+            bkg.storage.getItem('scanner-values');
+        });
+    });
+}
+*/
 function inject(msg, cb, options){
     chrome.tabs.getSelected(null, function(tab){
         if (!isUrl(tab.url)) 
             return;
         chrome.tabs.connect(tab.id).postMessage({
             message: msg,
+			tab:tab.tabId,
             options: options
         });
     });
 }
-
 
 function executeScript(file){
     chrome.tabs.getSelected(null, function(tab){
@@ -42,7 +45,7 @@ function executeScript(file){
 
 function getUrl(cb){
     chrome.tabs.getSelected(null, function(tab){
-            cb(tab.url);
+        cb(tab.url);
     });
 }
 
