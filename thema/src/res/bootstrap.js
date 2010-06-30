@@ -8,9 +8,9 @@ tHema.waitjQuery = function(){
 		jQuery.noConflict();
         if (tHema.onLoad) {
 			tHema.onLoad();
-        } else {
+        } /*else {
 			console.error('tHema.onLoad not found');
-        }
+        }*/
     }
 };
 console.log('first call waitjQuery');
