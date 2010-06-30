@@ -63,7 +63,9 @@ js:
 {{{
 //@require jquery
 //@require http://desandro.com/_base/js/jquery.masonry.min.js
-jQuery('#entries').masonry({ itemSelector: '.entry:visible'});
+jQuery('#entries').masonry({ itemSelector: '.entry:visible'}, function(){
+   $('#entries').css('height', '');
+});
 }}}
 
 css:
@@ -75,8 +77,6 @@ width:400px !important;
 }}}
 
 ----
-
-
 
 
 
