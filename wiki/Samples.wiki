@@ -5,11 +5,13 @@
 A few samples of possibilites with tHema.
 
 
-= GoogleReader =
+=== GoogleReader ===
+url:
 {{{
 https://www.google.com/reader/
 }}}
 
+js:
 {{{
 //@require jquery //
 tHema.onLoad = function(){
@@ -31,7 +33,7 @@ tHema.onLoad = function(){
 }
 }}}
 
-
+css:
 {{{
 #_fm{
 position:absolute;
