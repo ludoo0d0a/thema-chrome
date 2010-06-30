@@ -1,8 +1,10 @@
 var aliases = {
     jquery: [{
         id: 'jq',
-        js: 'http://ajax.googleapis.com/ajax/libs/jquery/$version/jquery.min.js',
-        jsx: "var tHema=tHema||{};tHema.waitjQuery=function(){console.log('in wait jquery');if(typeof jQuery==='undefined'){console.log('wait jquery');window.setTimeout(function(){console.log('recall waitjQuery');tHema.waitjQuery()},100)}else{console.log('jQuery.noConflict');jQuery.noConflict();if(tHema.onLoad){console.log('tHema.onLoad');tHema.onLoad()}else{console.log('ERROR tHema.onLoad');console.error('tHema.onLoad not found')}}};console.log('first call waitjQuery');tHema.waitjQuery();"
+        js: 'http://ajax.googleapis.com/ajax/libs/jquery/$version/jquery.min.js'
+    },{
+        id: 'jqboot',
+        js: chrome.extension.getURL('res/jquery/bootstrap.js')+'?'+Math.round(Math.random()*9999+1)
     }],
     jqueryui: [{
         id: 'jqui',
@@ -41,30 +43,35 @@ var aliases = {
     }]
 };
 
-var reRequire = /\/\/\s*@require\s+([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)\/\//;
+var reRequire = /\/\/\s*@require\s*(.*)$/mg;
+var reRequireLine = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
 //@require jquery 1.4.2 jq $
 //@require http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js jq
 function autoUpdate(coda, asjs){
-    var alias, code = coda;
-    var m = reRequire.exec(code);
-    if (m) {
-        var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
+    var i=0,rq,alias, code = coda;
+	while ((rq = reRequire.exec(code))){
+		var line = rq[1];
+		var m = reRequireLine.exec(line);
+		var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
         console.log('require ' + url);
-        if (asjs) {
-            //could be an alias
-            var alias = aliases[url];
-            if (alias) {
-                addLibraries(alias, version, shortcut);
-            } else {
-                addScript(url, id);
-            }
-        } else {
-            addStyle(url, id);
-        }
-        
-        //code =  "jQuery(document).ready(function(){"+js+"})";
-        //code =  "$(function(){"+js+"})";
+		console.log(m);
+		if (url) {
+			if (asjs) {
+				//could be an alias
+				var alias = aliases[url];
+				if (alias) {
+					addLibraries(alias, version, shortcut);
+				} else {
+					addScript(url, id);
+				}
+			} else {
+				addStyle(url, id);
+			}
+		}
     }
+	if (asjs) {
+		code = 'window.tHema=window.tHema||{};\n' + code;
+	}
     return code;
 }
 

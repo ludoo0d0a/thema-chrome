@@ -94,7 +94,7 @@
                 }
                 
                 function gonewprofile(xhr){
-                    var js = "//@require jquery //\ntHema.onLoad=function(){\n\tjQuery(document).ready(function(){\n\t\tconsole.log('jQuery loaded!!');\n\t\tjQuery(document.body).children().fadeOut(2000, function(){jQuery(document.body).children().fadeIn(2000);});\n\t});\n}\n";
+                    var js = "//@require jquery //\ntHema.onLoad=function(){\n\tjQuery(document).ready(function(){\n\t\tconsole.log('jQuery loaded!!');\n\t});\n}\n";
                     if (xhr && xhr.responseText) {
                         js = xhr.responseText;
                     }
@@ -111,7 +111,7 @@
                     callb(cb, p);
                 }
                 request({
-                    url: 'res/jquery.js'
+                    url: 'res/jquery/default.js'
                 }, true, gonewprofile);
                 gonewprofile();
             }
