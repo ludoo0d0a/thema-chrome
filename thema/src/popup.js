@@ -16,7 +16,8 @@ var samples = {
 
 function init(){
     loadCombo();
-    $(".lbl").inFieldLabels();
+    $(".lbl").hide();
+    //$(".lbl").inFieldLabels();
     $('#btn-css').click(getcss);
     $('#btn-apply').click(applyprofile);
     $('#btn-save').click(saveprofile);
@@ -24,83 +25,114 @@ function init(){
     $('#btn-del').click(delprofile);
     $('#btn-auto').click(toggleauto);
     inittab();
-}
-
-var editor, editorId;
-function setbespin(id, config, title){
-    var ed = $('div.bespin'), txt = $('#editor'), oldvalue = editor ? editor.value : '';
-    //var newvalue = $('#' + id).val();
-    var newvalue = $('#tx_' + config.syntax).val();
-    var o = config || {};
-    o.stealFocus = true;
-    bespin.useBespin(id, o).then(function(env){
-        env.settings.set("fontsize", 10);
-		env.settings.set("tabstop", 3);
-		env.settings.set("autoindent", true);
-		env.settings.set("codecomplete", true);
-		env.settings.set("completewithspace", true);
-        editor = env.editor;
-        if (!editor._textChanged) {
-            editor.textChanged.add(function(oldRange, newRange, newVal){
-                if (newVal) {
-                    $('#changed').show();
-                }
-            });
-            editor._textChanged = true;
+    initbespin({
+        css: {
+            syntax: 'css'
+        },
+        js: {
+            syntax: 'js',
+            then: function(){
+                setTab('css');
+                
+                //reopen last codes not saved
+                req('get', function(o){
+                    setDataProfile(o.value);
+                    //second time to override saved values (and activate changed flag)
+                    setTimeout(function(){
+                        setDataValues(o.value);
+                    }, 500);
+                }, {
+                    name: 'auto'
+                });
+            }
         }
-        editor.value = newvalue;
-        $('#changed').hide();
     });
-    
-    ed.remove();
-    txt.val(oldvalue);
-    if (title) {
-        txt.attr('title', title);
-    }
-    //txt.show();
-    editorId = config.syntax;
-}
-
-function toggleeditor(syntax){
-    setbespin('editor', {
-        syntax: syntax,
-        height: 600
-    }, syntax);
-}
-
-function updatevalue(){
-    if (editor) {
-        $('#tx_' + editorId).val(editor.value);
-    }
-}
-
-function updateeditor(){
-    if (editor) {
-        editor.value = $('#tx_' + editorId).val();
-        $('#changed').hide();
-    }
 }
 
 function initbespin(configs){
-    $.each(configs, function(id, config){
-        document.getElementById(id).addEventListener('focus', function(){
+    window.onBespinLoad = function(){
+        $.each(configs, function(id, config){
             setbespin(id, config);
-        }, false);
+        });
+    }
+}
+
+var editors = {};
+function setbespin(id, config, title){
+    var o = config || {};
+    //o.stealFocus = true;
+    console.log('bespin ' + id);
+    bespin.useBespin('tx_' + id, o).then(function(env){
+        env.settings.set("fontsize", 10);
+        env.settings.set("tabstop", 3);
+        env.settings.set("autoindent", true);
+        env.settings.set("codecomplete", true);
+        env.settings.set("completewithspace", true);
+        editors[id] = env.editor;
+        editors[id].textChanged.add(function(oldRange, newRange, newVal){
+            if (newVal) {
+                if (!editors[id]._textChanged) {
+                    $('#changed').show();
+                    editors[id]._textChanged = true;
+                }
+                if (!editors[id]._autosave) {
+                    var data = getData();
+                    data.tab = getCurrentTab();
+                    req('set', {
+                        name: 'auto',
+                        value: data
+                    });
+                }
+            }
+        });
+        $('#changed').hide();
+        if (config.then) {
+            config.then();
+        }
     });
+    
 }
 
 function toggleauto(e){
     var el = $(e.target);
     el.toggleClass('active');
-    var evt = 'keyup'; //change
-    if (el.hasClass('active')) {
-        $('#tx_css').bind(evt, applyprofile);
-        $('#tx_js').bind(evt, applyprofile);
-    } else {
-        //remove event listener
-        $('#tx_css').unbind(evt, applyprofile);
-        $('#tx_js').unbind(evt, applyprofile);
-    }
+    var status = el.hasClass('active');
+    editors.css._autosave = status;
+    editors.js._autosave = status;
+    /*var evt = 'keyup'; //change
+    
+     
+    
+     if (el.hasClass('active')) {
+    
+     
+    
+     $('#tx_css').bind(evt, applyprofile);
+    
+     
+    
+     $('#tx_js').bind(evt, applyprofile);
+    
+     
+    
+     } else {
+    
+     
+    
+     //remove event listener
+    
+     
+    
+     $('#tx_css').unbind(evt, applyprofile);
+    
+     
+    
+     $('#tx_js').unbind(evt, applyprofile);
+    
+     
+    
+     }*/
+    
 }
 
 function formatComboData(profiles, selected){
@@ -117,7 +149,7 @@ function formatComboData(profiles, selected){
 
 function loadCombo(selected){
     setData({});
-    $(".lbl").show();
+    //$(".lbl").show();
     req('profiles', function(data){
         profiles = data || {};
         var p = formatComboData(profiles, selected);
@@ -158,29 +190,40 @@ function getcss(){
 }
 
 function getData(){
-    updatevalue();
+    //updatevalue();
     return {
         name: $('#selprofile :selected').text(),
         url: $('#tx_url').val(),
-        js: $('#tx_js').val(),
-        css: $('#tx_css').val()
-    };
+        js: (editors.js) ? editors.js.value : '',
+        css: (editors.css) ? editors.css.value : ''
+    }
 }
 
 function setData(data){
+    setDataProfile(data);
+    setDataValues(data);
+}
+
+function setDataProfile(data){
     $('#tx_url').val(data.url || '');
-    $('#tx_js').val(data.js || '');
-    $('#tx_css').val(data.css || '');
-    updateeditor();
     
-    if (!data.css && editorId == 'css') {
+    var s = data.tab || getCurrentTab();
+    if (!data.css && s == 'css') {
         //set focus on js
-        setTab(true);
-    } else if (!data.js && editorId == 'js') {
+        setTab('js');
+    } else if (!data.js && s == 'js') {
         //set focus on css
-        setTab(false);
+        setTab('css');
     }
-    
+}
+
+function setDataValues(data){
+    if (editors.js) {
+        editors.js.value = data.js || '';
+    }
+    if (editors.css) {
+        editors.css.value = data.css || '';
+    }
 }
 
 function delprofile(){
@@ -254,7 +297,7 @@ function openprofile(id){
         console.log(data);
         data = data || {};
         setData(data);
-        $(".lbl").hide();
+        //$(".lbl").hide();
     }, {
         id: id,
         data: getData()
@@ -265,29 +308,30 @@ function openprofile(id){
  * Tab
  */
 function inittab(){
-    window.onBespinLoad = function(){
-        setTab(true);
-    }
     $('#btn-codecss').click(function(){
-        setTab(false);
+        setTab('css');
     });
     $('#btn-codejs').click(function(){
-        setTab(true);
+        setTab('js');
     });
 }
 
-function setTab(js){
-    togglebtn('js', js);
-    togglebtn('css', !js);
+function setTab(id){
+    $('#tabs_code .active').removeClass('active');
+    $('#btn-code' + id).addClass('active');
+    
+    $('#code .ctn.hidden').removeClass('hidden');
+    setTimeout(function(){
+        $('.ctn:not(#ctn_' + id + ')').addClass('hidden');
+    }, 400);
+    
+    //console.log('#ctn_' + oid +' '+show);
 }
 
-function togglebtn(id, show){
-    if (show) {
-        //$('#code' + id).show();
-        $('#btn-code' + id).addClass('active');
-        toggleeditor(id);
-    } else {
-        //$('#code' + id).hide();
-        $('#btn-code' + id).removeClass('active');
+function getCurrentTab(){
+    var id = 'js', el = $('#tabs_code .btn-tab.active');
+    if (el.length > 0) {
+        id = el[0].id.replace(/^btn-code/, '');
     }
+    return id;
 }

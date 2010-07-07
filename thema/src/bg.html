@@ -39,6 +39,14 @@
                     addjs(a, cb);
                 } else if (a.message === 'addcss') {
                     addcss(a, cb);
+                }else if (a.message === 'set') {
+                    setvalue(a.name, a.value);
+					cb();
+                }else if (a.message === 'get') {
+					cb({
+						name: a.name,
+						value: getvalue(a.name)
+					});
                 }
                 /*
                  else if (a.message === 'badge') {
@@ -51,7 +59,7 @@
                 var o = localStorage.getItem(name);
                 var value = o;
                 //try {
-                if (o) {
+                if (o && typeof o ==='string') {
                     value = JSON.parse(o);
                 }
                 //}catch(){}

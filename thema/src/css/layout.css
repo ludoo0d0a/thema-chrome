@@ -45,11 +45,23 @@ label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
 /**
  * 
  */
-.txta{
-	border:1px solid #ddd;
+.editor{
 	padding-left:20px;
 	height:400px;
 	width:400px;
+}
+.bespin{
+	margin: 0; 
+	padding: 0;
+	border: 0;
+}
+#code{
+	height:420px;
+	width:100%;
+}
+.ctn{
+	position:absolute;
+	top:55px;
 }
 
 #tabs_code{

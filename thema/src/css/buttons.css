@@ -70,11 +70,11 @@
    border-top-color: #28597a;
    background: #28597a;
    color: #ccc;
-   }
+}
 .btn-tab:active, .btn-tab.active {
    border-top-color: #1b435e;
    background: #1b435e;
-   }
+}
 /*
  * Specific sizes
  */   
