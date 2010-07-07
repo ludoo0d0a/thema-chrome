@@ -3,7 +3,11 @@ var isChrome = (typeof chrome !== 'undefined'), cbo, profiles = [];
 var emptyFn = function(){};
 function req(message, cb, data){
     if (isChrome && chrome.extension) {
-        var o = data || {};
+        if (typeof cb==='object' && typeof data ==='undefined'){
+			data=cb;
+			cb=false;
+		}
+		var o = data || {};
         o.message = message;
         console.log('send req '+message);
 		chrome.extension.sendRequest(o, cb||emptyFn);
