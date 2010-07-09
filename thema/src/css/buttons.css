@@ -80,11 +80,17 @@
  */   
 .btn-small{
 	width:20px;
-	float:right;
 	margin-left:5px;
+}
+.fr{
+	float:right;
+}
+.fl{
+	float:left;
 }
 .button{
 	margin-right:5px;
+	width:30px;
 }
 #btn-css{
 	width:45px;
