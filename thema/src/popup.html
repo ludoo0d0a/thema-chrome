@@ -17,7 +17,8 @@
         <link id="bespin_base" href="lib/bespin"/>
         <link rel="stylesheet" type="text/css" href="lib/bespin/BespinEmbedded.css">
         <script type="text/javascript" src="lib/bespin/BespinEmbedded.js"></script>
-        <script type="text/javascript" src="popup.js"></script>
+        
+		<script type="text/javascript" src="popup.js"></script>
     </head>
     <body onload="init();">
         <div id="main">
@@ -26,10 +27,10 @@
                     <div id="ctn-profile">
                     </div>
 					<div id="changed">* Not saved</div>
-                    <div id="btn-new" class="btn-small newprofile cursor">
+                    <div id="btn-new" class="btn-small fr newprofile cursor">
                         New
                     </div>
-                    <div id="btn-del" class="btn-small delprofile cursor">
+                    <div id="btn-del" class="btn-small fr delprofile cursor">
                         Del
                     </div>
                 </div>
@@ -63,7 +64,13 @@
             <div id="btn-auto" class="button cursor" title="Live update your page">
                 Auto
             </div>
-            <div id="btn-css" class="button cursor" title="Get CSS stylesheets">
+			<div id="btn-html" class="btn-small fl cursor">
+                HTML
+            </div>
+			<div id="btn-toast" class="btn-small fl cursor">
+                toast
+            </div>
+            <div id="btn-css" class="btn-small fl cursor" title="Get CSS stylesheets">
                 Get CSS
             </div>
         </div>

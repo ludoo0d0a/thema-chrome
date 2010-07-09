@@ -24,6 +24,8 @@ function init(){
     $('#btn-new').click(newprofile);
     $('#btn-del').click(delprofile);
     $('#btn-auto').click(toggleauto);
+	//$('#btn-html').click(testhtml);
+	$('#btn-toast').click(toastdemo);
     inittab();
     initbespin({
         css: {
@@ -60,7 +62,7 @@ function initbespin(configs){
 var editors = {};
 function setbespin(id, config, title){
     var o = config || {};
-    //o.stealFocus = true;
+    o.stealFocus = true;
     console.log('bespin ' + id);
     bespin.useBespin('tx_' + id, o).then(function(env){
         env.settings.set("fontsize", 10);
@@ -99,40 +101,6 @@ function toggleauto(e){
     var status = el.hasClass('active');
     editors.css._autosave = status;
     editors.js._autosave = status;
-    /*var evt = 'keyup'; //change
-    
-     
-    
-     if (el.hasClass('active')) {
-    
-     
-    
-     $('#tx_css').bind(evt, applyprofile);
-    
-     
-    
-     $('#tx_js').bind(evt, applyprofile);
-    
-     
-    
-     } else {
-    
-     
-    
-     //remove event listener
-    
-     
-    
-     $('#tx_css').unbind(evt, applyprofile);
-    
-     
-    
-     $('#tx_js').unbind(evt, applyprofile);
-    
-     
-    
-     }*/
-    
 }
 
 function formatComboData(profiles, selected){
@@ -207,6 +175,7 @@ function setData(data){
 function setDataProfile(data){
     $('#tx_url').val(data.url || '');
     
+return;
     var s = data.tab || getCurrentTab();
     if (!data.css && s == 'css') {
         //set focus on js
@@ -323,7 +292,7 @@ function setTab(id){
     $('#code .ctn.hidden').removeClass('hidden');
     setTimeout(function(){
         $('.ctn:not(#ctn_' + id + ')').addClass('hidden');
-    }, 400);
+    }, 600);
     
     //console.log('#ctn_' + oid +' '+show);
 }
@@ -335,3 +304,22 @@ function getCurrentTab(){
     }
     return id;
 }
+
+function toastdemo(){
+    setTimeout(function(){
+        req('toast', {
+			title: 'Demo toast',
+			text: 'This a toast'
+		});
+    }, 2000);
+    
+    setTimeout(function(){
+        req('toast', {
+			html: 'http://fr.grepolis.com'
+		});
+    }, 5000);
+    
+}
+
+
+

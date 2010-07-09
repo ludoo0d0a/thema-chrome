@@ -1,5 +1,13 @@
 var aliases = {
-    jquery: [{
+    greasekit:{
+		id: 'greasekit',
+		js: 'http://thema-chrome.googlecode.com/svn/thema/libs/greasekit.js'
+	},
+	userscript:{
+		id: 'userscript$version',
+		js: 'http://userscripts.org/scripts/source/$version.user.js'
+	},
+	jquery: [{
         id: 'jq',
         js: 'http://ajax.googleapis.com/ajax/libs/jquery/$version/jquery.min.js'
     },{
@@ -45,6 +53,7 @@ var aliases = {
 
 var reRequire = /\/\/\s*@require\s*(.*)$/mg;
 var reRequireLine = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
+var scripts=300;
 //@require jquery 1.4.2 jq $
 //@require http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js jq
 function autoUpdate(coda, asjs){
@@ -62,7 +71,7 @@ function autoUpdate(coda, asjs){
 				if (alias) {
 					addLibraries(alias, version, shortcut);
 				} else {
-					addScript(url, id);
+					addScript(url, id||scripts++);
 				}
 			} else {
 				addStyle(url, id);
@@ -75,6 +84,15 @@ function autoUpdate(coda, asjs){
     return code;
 }
 
+function fv(text, o){
+	var v=text;
+	if (o){
+	$.each(o, function(i,a){
+		v= v.replace('$'+i, a);
+	})
+	}
+	return v;
+}
 
 /**
  * Samples of monitoring (ala Aardvardk)
@@ -87,24 +105,26 @@ function autoUpdate(coda, asjs){
  });
  */
 function addLibraries(alias, version, shortcut){
-    version = version || alias.last || '1';
-    shortcut = shortcut || '$';
+    var o = {
+		version: version || alias.last || '1',
+		shortcut: shortcut || '$'
+	};
     
-    $.each(alias, function(i, o){
-        var url, code;
-        if (o.css) {
-            url = o.css.replace('$version', version);
-            addStyle(url, o.id);
-        }
-        if (o.js) {
-            url = o.js.replace('$version', version);
-            addScript(url, o.id);
-        }
-        if (o.jsx) {
-            code = o.jsx.replace('$shortcut', shortcut);
-            addScript(code, o.id + 'x', true);
-        }
-    });
+	var id = fv(alias.id, o);
+	
+    var url, code;
+    if (alias.css) {
+        url = fv(alias.css, o);
+        addStyle(url, id);
+    }
+    if (alias.js) {
+        url = fv(alias.js, o);
+        addScript(url, id);
+    }
+    if (alias.jsx) {
+        code = fv(alias.jsx, o);
+        addScript(code, id + 'x', true);
+    }
 }
 
 
