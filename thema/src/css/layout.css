@@ -3,6 +3,10 @@
     height:100px;
 	margin:5px;
 }
+.full #main{
+	width:1000px;
+    height:600px;
+}
 
 ol{
 	margin:0px;
@@ -47,8 +51,12 @@ label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
  */
 .editor{
 	padding-left:20px;
-	height:400px;
 	width:400px;
+	height:400px;
+}
+.full .editor{
+	width:1000px;
+    height:600px;
 }
 .bespin{
 	margin: 0; 

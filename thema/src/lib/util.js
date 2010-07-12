@@ -15,3 +15,8 @@ function serializeXml(nodes){
 	});
 	return html;
 }
+
+function getUrlDomain(url){
+	var p = parseUri(url);
+	return p.protocol+'//'+p.authority;
+}

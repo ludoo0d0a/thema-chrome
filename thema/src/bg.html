@@ -5,6 +5,7 @@
         <script type="application/javascript" src="lib/jquery-1.4.2.min.js"></script>
 		<script type="application/javascript" src="lib/toast.js"></script>
 		<script type="application/javascript" src="lib/xml2json.js"></script>
+		<script type="application/javascript" src="lib/parseuri.js"></script>
 		<script type="application/javascript" src="lib/util.js"></script>
         <script type="application/javascript">
             chrome.extension.onRequest.addListener(function(a, sender, cb){
@@ -91,7 +92,7 @@
                 if (!url) {
                     return getUrl(function(uri){
                         var domain = getUrlDomain();
-						newprofile(a, cb, uri);
+						newprofile(a, cb, domain);
                     });
                 }
                 

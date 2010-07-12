@@ -14,6 +14,7 @@
     "popup": "popup.html"
   },
   "background_page": "bg.html",
+  "options_page": "popup.html#full",
   "content_scripts": [
     {
 	  "matches": ["http://*/*", "https://*/*"],

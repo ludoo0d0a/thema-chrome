@@ -12,10 +12,13 @@ var samples = {
     }
 };
 
+
 //div{border:5px solid red;}
 
 function init(){
-    loadCombo();
+    var fullsize = (window.location.hash === '#full');
+	$(document.body).toggleClass('full',fullsize);
+	loadCombo();
     $(".lbl").hide();
     //$(".lbl").inFieldLabels();
     $('#btn-css').click(getcss);
