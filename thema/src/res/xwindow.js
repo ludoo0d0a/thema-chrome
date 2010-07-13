@@ -62,9 +62,9 @@ if (xw.isInContentScripts()) {
     console.log(window.Game);
     xw.onEvent('onevent in contentScripts');
 	var i =0;
-    setTimeout(function(){
+    /*setTimeout(function(){
         xw.postEvent('Game');
-    }, 5000);
+    }, 5000);*/
 } else {
     //in web page
     console.log('in web page');
