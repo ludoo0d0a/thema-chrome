@@ -3,6 +3,10 @@ var aliases = {
 		id: 'greasekit',
 		js: 'http://thema-chrome.googlecode.com/svn/thema/libs/greasekit.js'
 	},
+	xwindow:{
+		id: 'xwindow',
+		js: chrome.extension.getURL('res/xwindow.js')+'?'+Math.round(Math.random()*9999+1)
+	},
 	userscript:{
 		id: 'userscript$version',
 		js: 'http://userscripts.org/scripts/source/$version.user.js'
