@@ -18,7 +18,7 @@
   "content_scripts": [
     {
 	  "matches": ["http://*/*", "https://*/*"],
-	  "js": ["lib/jquery-1.4.2.min.js", "res/xwindow.js","lib/parseuri.js","lib/com.js", "scanner.js", "thema.js"]
+	  "js": ["lib/jquery-1.4.2.min.js", "res/xwindow.js", "lib/util.js","lib/parseuri.js","lib/com.js", "scanner.js", "thema.js"]
     }
   ],
   "permissions": [
