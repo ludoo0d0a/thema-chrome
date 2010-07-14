@@ -20,3 +20,7 @@ function getUrlDomain(url){
 	var p = parseUri(url);
 	return p.protocol+'//'+p.authority;
 }
+
+function isArray(obj){
+    return (obj && obj.constructor == Array);
+}

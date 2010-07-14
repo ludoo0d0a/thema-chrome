@@ -1,11 +1,14 @@
 #main {
     width:400px;
-    height:100px;
+    height:450px;
 	margin:5px;
 }
 .full #main{
 	width:1000px;
     height:600px;
+}
+.full #btn-html, .full #btn-toast, .full #btn-css {
+	display:none;
 }
 
 ol{
@@ -17,7 +20,9 @@ ol{
 	display:none;
 }
 
-
+#footer{
+	margin-top:5px;
+}
 /**
  * Layout position
  */
@@ -40,45 +45,17 @@ ol{
 	float:left;
 }
 
-/*
- * Infield Labels 
- */
-form p { position:relative }
-label  { position:absolute; top:0; left:0; margin-left:6px;margin-top:4px}
-
-/**
- * 
- */
-.editor{
-	padding-left:20px;
-	width:400px;
-	height:400px;
-}
-.full .editor{
-	width:1000px;
-    height:600px;
-}
-.bespin{
-	margin: 0; 
-	padding: 0;
-	border: 0;
-}
-#code{
-	height:420px;
-	width:100%;
-}
-.ctn{
-	position:absolute;
-	top:55px;
-}
-
-#tabs_code{
-	height:20px;
-	float:right;
-	width:75px;
-}
-
 #changed{
 	color:#fff;
 	display:inline;
+}
+
+/**
+ * Settings panel
+ */
+#panel-settings {
+	padding: 15px 20px;
+}
+#panel-settings p{
+	margin: 5px;
 }
