@@ -12,15 +12,13 @@ var samples = {
     }
 };
 
-
 //div{border:5px solid red;}
-
-function init(){
+$(function() {
     var fullsize = (window.location.hash === '#full');
 	$(document.body).toggleClass('full',fullsize);
+	inittab();
 	loadCombo();
     $(".lbl").hide();
-    //$(".lbl").inFieldLabels();
     $('#btn-css').click(getcss);
     $('#btn-apply').click(applyprofile);
     $('#btn-save').click(saveprofile);
@@ -29,17 +27,18 @@ function init(){
     $('#btn-auto').click(toggleauto);
 	//$('#btn-html').click(testhtml);
 	$('#btn-toast').click(toastdemo);
-    inittab();
-    initbespin({
+	
+	initbespin({
         css: {
             syntax: 'css'
         },
         js: {
             syntax: 'js',
             then: function(){
-                setTab('css');
-                
-                //reopen last codes not saved
+                //setTab('css');
+                $('.editor-start').removeClass('editor-start');
+				/*
+				//reopen last codes not saved
                 req('get', function(o){
                     setDataProfile(o.value);
                     //second time to override saved values (and activate changed flag)
@@ -48,15 +47,25 @@ function init(){
                     }, 500);
                 }, {
                     name: 'auto'
-                });
+                });*/
             }
         }
     });
+});
+
+function inittab(){
+	$.tools.tabs.addEffect("def", function(tabIndex, done) {
+		this.getPanes().hide().delay(500).eq(tabIndex).show();
+		done.call();
+	});
+	
+    $("ul.tabs").tabs("div.panes > div", {effect: 'def'});
 }
+
 
 function initbespin(configs){
     window.onBespinLoad = function(){
-        $.each(configs, function(id, config){
+		$.each(configs, function(id, config){
             setbespin(id, config);
         });
     }
@@ -74,7 +83,7 @@ function setbespin(id, config, title){
         env.settings.set("codecomplete", true);
         env.settings.set("completewithspace", true);
         editors[id] = env.editor;
-        editors[id].textChanged.add(function(oldRange, newRange, newVal){
+       /* editors[id].textChanged.add(function(oldRange, newRange, newVal){
             if (newVal) {
                 if (!editors[id]._textChanged) {
                     $('#changed').show();
@@ -89,8 +98,8 @@ function setbespin(id, config, title){
                     });
                 }
             }
-        });
-        $('#changed').hide();
+        });*/
+        //$('#changed').hide();
         if (config.then) {
             config.then();
         }
@@ -122,7 +131,7 @@ function loadCombo(selected){
     setData({});
     //$(".lbl").show();
     req('profiles', function(data){
-        profiles = data || {};
+        profiles = data || samples.profiles;
         var p = formatComboData(profiles, selected);
         //clear previous sexy combo
         $("#ctn-profile").html('');
@@ -130,12 +139,15 @@ function loadCombo(selected){
             name: "selprofile",
             id: "selprofile",
             container: "#ctn-profile",
-            data: p,
-            triggerSelected: true,
-            autoFill: true,
+            //data: p,
+            //triggerSelected: true,
+            //autoFill: true,
+			filterFn: function () {
+    			return true;
+    		},
             changeCallback: function(){
                 //change profile
-                openprofile(this.hidden.val());
+                //openprofile(this.hidden.val());
             }
         });
         if (selected) {
@@ -176,8 +188,10 @@ function setData(data){
 }
 
 function setDataProfile(data){
-    $('#tx_url').val(data.url || '');
-    
+    if (data) {
+		$('#tx_url').val(data.url || '');
+	}
+    /*
 return;
     var s = data.tab || getCurrentTab();
     if (!data.css && s == 'css') {
@@ -186,7 +200,7 @@ return;
     } else if (!data.js && s == 'js') {
         //set focus on css
         setTab('css');
-    }
+    }*/
 }
 
 function setDataValues(data){
@@ -279,15 +293,8 @@ function openprofile(id){
 /**
  * Tab
  */
-function inittab(){
-    $('#btn-codecss').click(function(){
-        setTab('css');
-    });
-    $('#btn-codejs').click(function(){
-        setTab('js');
-    });
-}
 
+/*
 function setTab(id){
     $('#tabs_code .active').removeClass('active');
     $('#btn-code' + id).addClass('active');
@@ -299,6 +306,7 @@ function setTab(id){
     
     //console.log('#ctn_' + oid +' '+show);
 }
+*/
 
 function getCurrentTab(){
     var id = 'js', el = $('#tabs_code .btn-tab.active');

@@ -11,7 +11,9 @@ function req(message, cb, data){
         o.message = message;
         console.log('send req '+message);
 		chrome.extension.sendRequest(o, cb||emptyFn);
-    }
+    }else{
+		cb(false);
+	}
 }
 
 /*

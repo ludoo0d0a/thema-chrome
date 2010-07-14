@@ -1,0 +1,18 @@
+.bespin {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    height: 350px;
+    border: 0px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+}
+
+.editor-start {
+	display: block !important;
+	height:10px;
+}
+
+#tx_css .container{
+	color:#ffffff !important;
+}

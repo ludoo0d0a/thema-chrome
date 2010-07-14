@@ -68,9 +68,14 @@ form {
     display: inline;
 }
 
-label, input, select,textarea {
+input, select,textarea {
     color: #888;
     background-color: #fff;
+	padding: 0;
+    margin: 0;
+}
+label {
+    color: #fff;
 	padding: 0;
     margin: 0;
 }

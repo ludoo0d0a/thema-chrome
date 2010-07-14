@@ -4,29 +4,29 @@
         <title>tHema menu</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link type="text/css" href="popup.css" rel="stylesheet">
-        <script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
-        <!--link rel="stylesheet" type="text/css" href="lib/infield/labels.css" /-->
-        <!--script type="text/javascript" src="lib/infield/jquery.infieldlabel.js"></script-->
-        <script type="text/javascript" src="lib/message/jquery.message.min.js"></script>
+        <script src="lib/jquery-1.4.2.min.js"></script>
+        <script src="http://cdn.jquerytools.org/1.2.3/tiny/jquery.tools.min.js"></script>
         <link rel="stylesheet" type="text/css" href="lib/message/jquery.message.css" />
-        <script type="text/javascript" src="lib/sexycombo/jquery.sexy-combo.min.js"></script>
+        <script type="text/javascript" src="lib/sexycombo/jquery.sexy-combo.js"></script>
         <link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy-combo.css" />
         <link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy/sexy.css">
         <link rel="stylesheet" type="text/css" href="lib/sexycombo/css/sexy/sexy-large.css">
+        <script type="text/javascript" src="lib/util.js"></script>
         <script type="text/javascript" src="lib/com.js"></script>
         <link id="bespin_base" href="lib/bespin"/>
         <link rel="stylesheet" type="text/css" href="lib/bespin/BespinEmbedded.css">
         <script type="text/javascript" src="lib/bespin/BespinEmbedded.js"></script>
-        
-		<script type="text/javascript" src="popup.js"></script>
+        <script type="text/javascript" src="popup.js"></script>
     </head>
-    <body onload="init();">
+    <body>
         <div id="main">
             <form>
                 <div id="profile">
                     <div id="ctn-profile">
                     </div>
-					<div id="changed">* Not saved</div>
+                    <div id="changed">
+                        * Not saved
+                    </div>
                     <div id="btn-new" class="btn-small fr newprofile cursor">
                         New
                     </div>
@@ -34,44 +34,55 @@
                         Del
                     </div>
                 </div>
-                <div id="ctn-filter">
-                    <label id="lblfilter" class="lbl" for="tx_url">Url filter</label>
-                    <input title="Url filter" size="40" type="text" id="tx_url"/>
-                </div>
-                <div id="tabs_code">
-                    <div id="btn-codecss" class="btn-tab cursor">
-                        CSS
+                <ul class="tabs skin2">
+                    <li>
+                        <a href="#">JS</a>
+                    </li>
+                    <li>
+                        <a href="#">CSS</a>
+                    </li>
+                    <li>
+                        <a href="#">Settings</a>
+                    </li>
+                </ul>
+                <div class="panes skin2">
+                    <div class="editor-start">
+						<div id="tx_js" class="editor"> </div>
                     </div>
-                    <div id="btn-codejs" class="btn-tab cursor">
-                        JS
+                    <div class="editor-start">
+						<div id="tx_css" class="editor"> </div>
                     </div>
-                </div>
-                <div id="code">
-					<div id="ctn_css" class="ctn">
-						<div id="tx_css" class="editor"></div>
-					</div>
-					<div id="ctn_js" class="ctn">
-						<div id="tx_js" class="editor"></div>
-					</div>
+                    <div id="panel-settings">
+                        <p>
+							<label id="lbl_name" for="tx_name">Name</label>
+	                        <input title="name" size="40" type="text" id="tx_name"/>
+						</p>
+						<p>
+							<label id="lbl_url" for="tx_url">Url filter</label>
+	                        <input title="Url filter" size="40" type="text" id="tx_url"/>
+						</p>
+                    </div>
                 </div>
             </form>
-            <div id="btn-apply" class="button cursor" title="Apply javascript and css changes on the current page">
-                Apply changes
-            </div>
-            <div id="btn-save" class="button cursor" title="Save this profile">
-                Save
-            </div>
-            <div id="btn-auto" class="button cursor" title="Live update your page">
-                Auto
-            </div>
-			<div id="btn-html" class="btn-small fl cursor">
-                HTML
-            </div>
-			<div id="btn-toast" class="btn-small fl cursor">
-                toast
-            </div>
-            <div id="btn-css" class="btn-small fl cursor" title="Get CSS stylesheets">
-                Get CSS
+            <div id="footer">
+                <div id="btn-apply" class="button cursor" title="Apply javascript and css changes on the current page">
+                    Apply changes
+                </div>
+                <div id="btn-save" class="button cursor" title="Save this profile">
+                    Save
+                </div>
+                <div id="btn-auto" class="button cursor" title="Live update your page">
+                    Auto
+                </div>
+                <div id="btn-html" class="btn-small fl cursor">
+                    HTML
+                </div>
+                <div id="btn-toast" class="btn-small fl cursor">
+                    toast
+                </div>
+                <div id="btn-css" class="btn-small fl cursor" title="Get CSS stylesheets">
+                    Get CSS
+                </div>
             </div>
         </div>
         <div id="output">
