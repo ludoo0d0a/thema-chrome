@@ -109,6 +109,13 @@ function fv(text, o){
  });
  */
 function addLibraries(alias, version, shortcut){
+	if (isArray(alias)){
+		$.each(alias, function(i,a){
+			addLibraries(a, version, shortcut);
+		});
+		return;
+	}
+	
     var o = {
 		version: version || alias.last || '1',
 		shortcut: shortcut || '$'
