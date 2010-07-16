@@ -19,3 +19,15 @@ function toastHtml(page){
         notification.show();
     }
 }
+/*
+if (webkitNotifications) {
+    var time = /(..)(:..)/(Date());
+    var hour = time[1] % 12 || 12; 
+    var period = time[1] < 12 ? 'a.m.' : 'p.m.';
+    var notification = webkitNotifications.createNotification('48.png', 
+	 	hour + time[2] + ' ' + period, 
+	 	'Time to make the toast.'
+	);
+    notification.show();
+}
+*/

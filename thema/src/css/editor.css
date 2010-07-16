@@ -8,9 +8,15 @@
     -webkit-border-radius: 10px;
 }
 
-.editor-start {
-	display: block !important;
-	height:10px;
+#editors {
+	position: absolute;
+	left: 7px;
+	top: 70px;
+}
+	
+.ctn_editor {
+	position: absolute;
+	width:395px;
 }
 
 #tx_css .container{

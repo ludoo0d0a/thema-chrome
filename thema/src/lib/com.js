@@ -10,10 +10,19 @@ function req(message, cb, data){
 		var o = data || {};
         o.message = message;
         console.log('send req '+message);
+		console.log(o);
 		chrome.extension.sendRequest(o, cb||emptyFn);
     }else{
 		cb(false);
 	}
+}
+
+function xhr(url, cb){
+	req('xhr', function(xhr){
+		if (xhr.status == 200) {
+			cb(xhr.responseText);
+		}
+	}, {url:url});
 }
 
 /*
@@ -28,8 +37,8 @@ function inject(message, cb, data){
 */
 function inject(msg, cb, options){
     chrome.tabs.getSelected(null, function(tab){
-        if (!isUrl(tab.url)) 
-            return;
+        //if (!isUrl(tab.url)) 
+        //    return;
         chrome.tabs.connect(tab.id).postMessage({
             message: msg,
 			tab:tab.tabId,
