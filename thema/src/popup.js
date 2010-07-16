@@ -13,59 +13,48 @@ var samples = {
 };
 
 //div{border:5px solid red;}
-$(function() {
+$(function(){
     var fullsize = (window.location.hash === '#full');
-	$(document.body).toggleClass('full',fullsize);
-	inittab();
-	loadCombo();
-    $(".lbl").hide();
-    $('#btn-css').click(getcss);
-    $('#btn-apply').click(applyprofile);
-    $('#btn-save').click(saveprofile);
-    $('#btn-new').click(newprofile);
-    $('#btn-del').click(delprofile);
-    $('#btn-auto').click(toggleauto);
-	//$('#btn-html').click(testhtml);
-	$('#btn-toast').click(toastdemo);
-	
-	initbespin({
+    $(document.body).toggleClass('full', fullsize);
+    inittab();
+    loadCombo();
+    initbespin({
         css: {
             syntax: 'css'
         },
         js: {
             syntax: 'js',
             then: function(){
-                //setTab('css');
-                $('.editor-start').removeClass('editor-start');
-				/*
-				//reopen last codes not saved
+                //reopen last codes not saved
                 req('get', function(o){
                     setDataProfile(o.value);
                     //second time to override saved values (and activate changed flag)
                     setTimeout(function(){
                         setDataValues(o.value);
+						$('#changed').hide();
                     }, 500);
                 }, {
                     name: 'auto'
-                });*/
+                });
             }
         }
     });
+    
+    $('#btn-css').click(getcss);
+    $('#btn-apply').click(applyprofile);
+    $('#btn-save').click(saveprofile);
+    $('#btn-new').click(newprofile);
+    $('#btn-del').click(delprofile);
+    $('#btn-auto').click(toggleauto);
+    //$('#btn-html').click(testhtml);
+    //$('#btn-toast').click(toastdemo);
+    $('#btn-unpack').click(unpack);
 });
-
-function inittab(){
-	$.tools.tabs.addEffect("def", function(tabIndex, done) {
-		this.getPanes().hide().delay(500).eq(tabIndex).show();
-		done.call();
-	});
-	
-    $("ul.tabs").tabs("div.panes > div", {effect: 'def'});
-}
 
 
 function initbespin(configs){
     window.onBespinLoad = function(){
-		$.each(configs, function(id, config){
+        $.each(configs, function(id, config){
             setbespin(id, config);
         });
     }
@@ -75,15 +64,15 @@ var editors = {};
 function setbespin(id, config, title){
     var o = config || {};
     o.stealFocus = true;
+    o.autoindent = true;
+    o.codecomplete = true;
+    o.completewithspace = true;
     console.log('bespin ' + id);
     bespin.useBespin('tx_' + id, o).then(function(env){
-        env.settings.set("fontsize", 10);
+        env.settings.set("fontsize", 11);
         env.settings.set("tabstop", 3);
-        env.settings.set("autoindent", true);
-        env.settings.set("codecomplete", true);
-        env.settings.set("completewithspace", true);
         editors[id] = env.editor;
-       /* editors[id].textChanged.add(function(oldRange, newRange, newVal){
+        editors[id].textChanged.add(function(oldRange, newRange, newVal){
             if (newVal) {
                 if (!editors[id]._textChanged) {
                     $('#changed').show();
@@ -98,8 +87,8 @@ function setbespin(id, config, title){
                     });
                 }
             }
-        });*/
-        //$('#changed').hide();
+        });
+        $('#changed').hide();
         if (config.then) {
             config.then();
         }
@@ -129,7 +118,6 @@ function formatComboData(profiles, selected){
 
 function loadCombo(selected){
     setData({});
-    //$(".lbl").show();
     req('profiles', function(data){
         profiles = data || samples.profiles;
         var p = formatComboData(profiles, selected);
@@ -139,15 +127,12 @@ function loadCombo(selected){
             name: "selprofile",
             id: "selprofile",
             container: "#ctn-profile",
-            //data: p,
-            //triggerSelected: true,
-            //autoFill: true,
-			filterFn: function () {
-    			return true;
-    		},
+            data: p,
+            triggerSelected: true,
+            autoFill: true,
             changeCallback: function(){
                 //change profile
-                //openprofile(this.hidden.val());
+                openprofile(this.hidden.val());
             }
         });
         if (selected) {
@@ -175,8 +160,8 @@ function getcss(){
 function getData(){
     //updatevalue();
     return {
-        name: $('#selprofile :selected').text(),
-        url: $('#tx_url').val(),
+        name: $('#tx_name').val(),
+        url: $('#tx_url').val().split('\n'),
         js: (editors.js) ? editors.js.value : '',
         css: (editors.css) ? editors.css.value : ''
     }
@@ -189,10 +174,13 @@ function setData(data){
 
 function setDataProfile(data){
     if (data) {
-		$('#tx_url').val(data.url || '');
-	}
-    /*
-return;
+        $('#tx_name').val(data.name);
+        var url = data.url;
+        if (isArray(data.url)) {
+            url = data.url.join('\n');
+        }
+        $('#tx_url').val(url);
+    }
     var s = data.tab || getCurrentTab();
     if (!data.css && s == 'css') {
         //set focus on js
@@ -200,14 +188,15 @@ return;
     } else if (!data.js && s == 'js') {
         //set focus on css
         setTab('css');
-    }*/
+    }
+    
 }
 
 function setDataValues(data){
-    if (editors.js) {
+    if (editors.js && data.js) {
         editors.js.value = data.js || '';
     }
-    if (editors.css) {
+    if (editors.css && data.css) {
         editors.css.value = data.css || '';
     }
 }
@@ -276,6 +265,13 @@ function applyprofile(){
     });
 }
 
+function unpack(){
+    inject('unpack', function(){
+        $().message("Unpack done!");
+    }, { //no option for the moment
+});
+}
+
 function openprofile(id){
     console.log('open profile ' + id);
     req('open', function(data){
@@ -283,54 +279,83 @@ function openprofile(id){
         console.log(data);
         data = data || {};
         setData(data);
-        //$(".lbl").hide();
     }, {
         id: id,
         data: getData()
     });
 }
 
+
 /**
  * Tab
  */
-
-/*
-function setTab(id){
-    $('#tabs_code .active').removeClass('active');
-    $('#btn-code' + id).addClass('active');
+var tabs;
+function inittab(){
+    $.tools.tabs.addEffect("def", function(tabIndex, done){
+        this.getPanes().hide().eq(tabIndex).show();
+        showEditor(tabIndex);
+    });
     
-    $('#code .ctn.hidden').removeClass('hidden');
-    setTimeout(function(){
-        $('.ctn:not(#ctn_' + id + ')').addClass('hidden');
-    }, 600);
+    tabs = $("ul.tabs").tabs("div.panes > div", {
+        effect: 'def'
+    });
     
-    //console.log('#ctn_' + oid +' '+show);
 }
-*/
 
 function getCurrentTab(){
-    var id = 'js', el = $('#tabs_code .btn-tab.active');
-    if (el.length > 0) {
-        id = el[0].id.replace(/^btn-code/, '');
+    if (tabs && tabs.getCurrentTab) {
+        return tabs.getCurrentTab().attr('id').replace(/^tab_/, '');
+    } else {
+        return false;
     }
-    return id;
-}
-
-function toastdemo(){
-    setTimeout(function(){
-        req('toast', {
-			title: 'Demo toast',
-			text: 'This a toast'
-		});
-    }, 2000);
-    
-    setTimeout(function(){
-        req('toast', {
-			html: 'http://fr.grepolis.com'
-		});
-    }, 5000);
     
 }
 
+var tabsIndex = {
+    css: 1,
+    js: 2,
+    settings: 3
+};
+function setTab(id){
+    if (tabsIndex[id]) {
+        //tabs.click(tabsIndex[id]);
+    }
+}
 
+function showEditor(index){
+    $('.ctn_editor').css('left', -9999);
+    $('.editor_' + index).css('left', 0);
+}
+
+/* 
+
+ function toastdemo(){
+
+ setTimeout(function(){
+
+ req('toast', {
+
+ title: 'Demo toast',
+
+ text: 'This a toast'
+
+ });
+
+ }, 2000);
+
+ 
+
+ setTimeout(function(){
+
+ req('toast', {
+
+ html: 'http://fr.grepolis.com'
+
+ });
+
+ }, 5000);
+
+ }
+
+ */
 
