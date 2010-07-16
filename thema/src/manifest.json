@@ -17,8 +17,16 @@
   "options_page": "popup.html#full",
   "content_scripts": [
     {
-	  "matches": ["http://*/*", "https://*/*"],
-	  "js": ["lib/jquery-1.4.2.min.js", "res/xwindow.js", "lib/util.js","lib/parseuri.js","lib/com.js", "scanner.js", "thema.js"]
+	  "matches": ["http://*/*", "https://*/*","file://*/*"],
+	  "js": ["lib/jquery-1.4.2.min.js", "res/xwindow.js", 
+	  "lib/util.js","lib/parseuri.js","lib/com.js", 
+	  
+	  "lib/unpack/beautify.js", "lib/unpack/beautify-html.js",
+	  "lib/unpack/unpackers/javascriptobfuscator_unpacker.js",
+	  "lib/unpack/unpackers/bookmarklet_unpacker.js",
+	  "lib/unpack/unpackers/p_a_c_k_e_r_unpacker.js",
+	  "unpacker.js",	  
+	  "scanner.js", "thema.js"]
     }
   ],
   "permissions": [

@@ -17,7 +17,7 @@ req('dataprofiles', function(profiles){
 
 chrome.extension.onConnect.addListener(function(port){
     port.onMessage.addListener(function(a){
-        console.log('get content message ' + a.message);
+        //console.log('get content message ' + a.message);
         if (a.message === 'scan') {
             savepage(a.options, function(res){
                 req('bg-scan');
@@ -26,9 +26,15 @@ chrome.extension.onConnect.addListener(function(port){
             apply(a.options.data, a.tab, function(res){
                 req('bg-apply');
             });
+        }else if (a.message === 'unpack') {
+            unpackscripts(a.options.data, a.tab, function(res){
+                //req('unpackdone');
+            });
         }
     });
 });
+
+
 
 var mytabId;
 function apply(options, tabId, cb){
@@ -40,8 +46,6 @@ function apply(options, tabId, cb){
     console.log('scanner.apply js');
     var js = autoUpdate(options.js, true);
     addScript(js, 'thjs' || options.id, true);
-    
-    
 }
 
 function savepage(options, cb){
