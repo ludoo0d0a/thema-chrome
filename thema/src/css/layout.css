@@ -54,8 +54,5 @@ ol{
  * Settings panel
  */
 #panel-settings {
-	padding: 15px 20px;
-}
-#panel-settings p{
-	margin: 5px;
+	padding: 15px;
 }

@@ -24,3 +24,35 @@ function getUrlDomain(url){
 function isArray(obj){
     return (obj && obj.constructor == Array);
 }
+
+function addjs(script, inline, id, cb, scope, time){
+    var prev=$('#' + id), el = $('<script type="text/javascript">');	
+    if (prev.length > 0) {
+		//Ensure no conflict in IDs
+		prev.removeAttr('id');
+	}
+	if (inline) {
+       el.removeAttr('src').text(script);
+    } else {
+       el.text('').attr('src', script);
+    }
+    if (id) {
+        el.attr('id', id);
+    }
+    if (prev.length > 0) {
+		el.insertAfter(prev);
+	} else {
+		el.appendTo($('head')[0]);
+	}
+	
+	if (prev.length> 0) {
+		//remove it
+		prev.remove();
+	}
+	
+    if (cb) {
+        window.setTimeout(function(){
+            cb.call(scope || this);
+        }, time || 500);
+    }
+}

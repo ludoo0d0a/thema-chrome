@@ -50,10 +50,10 @@ ul.tabs a.current {
 
 /* tab pane */
 .panes > div {
-    display: none;
+    /*display: none;*/
     border: 1px solid #666;
     border-width: 0 1px 1px 1px;
-    min-height: 320px;
+    min-height: 350px;
     color: #fff;
 	background-color: #364451;
 	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#4E5E6D), to(#182837));
