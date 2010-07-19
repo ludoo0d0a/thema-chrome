@@ -8,6 +8,14 @@
     -webkit-border-radius: 10px;
 }
 
+.editor .ted {
+    color: #fff;
+    background-color: #000;
+	border:1px solid #dedede;
+	width:100%;
+	height:300px;
+}
+	
 #editors {
 	position: absolute;
 	left: 7px;
@@ -18,6 +26,20 @@
 	position: absolute;
 	width:395px;
 }
+
+.full .ctn_editor {
+	width:950px;
+	height:800px;
+}
+
+.full .editor .ted {
+	height:800px;
+}
+
+.full .panes > div {
+	min-height:800px;
+}
+
 
 #tx_css .container{
 	color:#ffffff !important;

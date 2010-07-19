@@ -49,7 +49,7 @@ var aliases = {
         css: "http://extjs.cachefly.net/ext-$version/resources/css/ext-all.css"
     }],
 	jlinq: [{
-        id: 'extjs',
+        id: 'jlinq',
 		last:'2.2.1',
         js: "http://www.hugoware.net/Downloads/Get/jLinq-$version.js"        
     }]
