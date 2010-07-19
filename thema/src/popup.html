@@ -55,8 +55,16 @@
                     <div id="panel-settings">
                         <p><label id="lbl_name" for="tx_name">Name</label><input title="name" size="40" type="text" id="tx_name"/></p><p><label id="lbl_url" for="tx_url">Url filter</label>
                             <br/>
-                            <textarea title="Url filter" rows="10" cols="40" id="tx_url"></textarea>
+                            <textarea title="Url filter" rows="5" cols="40" id="tx_url"></textarea>
                         </p>
+						<p>
+							<label for="teditor">Editor (reopen window to take effect): </label>
+							<select id="teditor" name="teditor">
+								<option value="bespin">Bespin</option>
+								<option value="textarea">Textarea</option>
+								<option value="codemirror">CodeMirror</option>
+							</select>
+						</p>
                         <p><a href="http://code.google.com/p/thema-chrome/wiki/JsHelp" target="_blank">Help on Javascript import rules</a></p>
                         <p><a href="http://www.userscripts.org" target="_blank">Find new scripts</a>
                             <form method="get" action="http://userscripts.org/scripts/search" target="_blank">
@@ -97,8 +105,8 @@
                 <div id="btn-load" class="btn-small cursor" title="load">
                 load
                 </div>-->
-                <div id="btn-css" class="button fl cursor" title="Get CSS stylesheets">
-                    CSS
+                <div id="btn-scan" class="button fl cursor" title="Scan page">
+                    Scan
                 </div>
                 <div id="btn-unpack" class="button fl cursor" title="Unpack scripts">
                     Unpack

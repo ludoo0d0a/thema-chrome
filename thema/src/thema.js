@@ -1,6 +1,7 @@
 //TODO: 
 //Check @include in userscripts
-//store in cache , edit capabilities
+//store in cache, edit capabilities
+//add script userscript
 var aliases = {
     greasekit:{
 		id: 'greasekit',

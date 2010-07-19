@@ -120,3 +120,38 @@ function absoluteUrl(url, urlpage){
     }
     return u;
 }
+/*
+function resolveUrl(url, urlbase){
+	urlbase = urlbase || window.location.href;
+	var p = parseUri(urlpage);
+	urlbase = removeTrailingSlash(p.protocol + '://' + p.authority + p.directory) + '/'
+	
+    //var res = noParameters(url);
+    var res = url;
+    
+    //urlbase should ends with /
+    if (!/\/$/.test(urlbase)) {
+        urlbase += '/';
+    }
+    if (!/^http/.test(res)) {
+        if (/^\//.test(res)) {
+            var n = /^https?:\/\/[^\/]*\//.exec(urlbase);
+            if (n && n[0]) {
+                res = n[0] + res;
+            }
+        } else {
+            //relative
+            res = urlbase + res;
+        }
+        res = cleanback(res);
+    }
+    return res;
+}
+
+function cleanback(url){
+    var res = url;
+    var res = res.replace(/^:\/\//g, '/');
+    var res = res.replace(/(\/[^\/]*\/\.\.)/g, '');
+    return res;
+}
+*/
