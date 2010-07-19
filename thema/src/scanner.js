@@ -3,17 +3,42 @@ req('profiles', function(profiles){
     $.each(profiles, function(id, p){
         if (p && p.url) {
             $.each(p.url, function(i, u){
-				var re = new RegExp(encodeRE(u));
-	            if (re.test(url)) {
-	                console.log('Apply profile ' + id + ' / ' + u);
-	                apply(p);
-	            }
-			});
+                var re = new RegExp(encodeRE(u));
+                if (re.test(url)) {
+                    console.log('Apply profile ' + id + ' / ' + u);
+                    apply(p);
+                }
+            });
         }
     });
 });
 
-
+function autoIntall(){
+    var source = window.location.href;
+    if (/^https?:\/\/(www\.)?userscripts.org/.test(source)) {
+        var l = $('#install_script a.userjs');
+        l.hide().after($('<a href="#" title="Install as tHema script" class="userjs">Install</a>').bind('click', function(e){
+            e.stopPropagation();
+            var name = $('#details .title').text();
+            if (confirm('Install tHema script :\n' + name + ' ?')) {
+                var url = l.attr('href');
+                var m = /(\d+).user.js$/.exec(url);
+                if (m && m[1]) {
+                    var id = m[1];
+                    req('userscript', function(){
+                    }, {
+                        url: url,
+                        name: name,
+                        source: source,
+                        id: id
+                    });
+                    
+                }
+            }
+        }));
+    }
+}
+autoIntall();
 
 chrome.extension.onConnect.addListener(function(port){
     port.onMessage.addListener(function(a){
@@ -26,38 +51,38 @@ chrome.extension.onConnect.addListener(function(port){
             apply(a.options.data, a.tab, function(res){
                 req('bg-apply');
             });
-        }else if (a.message === 'unpack') {
-			unpackscripts(a.options.data, a.tab, function(res){
+        } else if (a.message === 'unpack') {
+            unpackscripts(a.options.data, a.tab, function(res){
                 //req('unpackdone');
             });
-        }else if (a.message === 'unpackpage') {
-			var s = getAllScripts();
-			req('unpack', function(a){
-				replaceScripts(a);
-				$().message("Unpack done!");
-			}, {
-				scripts:s
-			});
-			
+        } else if (a.message === 'unpackpage') {
+            var s = getAllScripts();
+            req('unpack', function(a){
+                replaceScripts(a);
+                //$().message("Unpack done!");
+            }, {
+                scripts: s
+            });
+            
         }
     });
 });
 
 function replaceScripts(scripts){
-	$.each(scripts, function(id,s){
-		if (s.jsfile) {
-			document.write(s.code);
-		} else {
-			addjs(s.code, true, id);
-		}
-	});
+    $.each(scripts, function(id, s){
+        if (s.jsfile) {
+            document.write(s.code);
+        } else {
+            addjs(s.code, true, id);
+        }
+    });
 }
 
 
 var mytabId;
 function apply(options, tabId, cb){
-    mytabId=tabId;
-	console.log('scanner.apply css');
+    mytabId = tabId;
+    console.log('scanner.apply css');
     var css = autoUpdate(options.css, false);
     addStyle(css, 'thcss' || options.id, true);
     
@@ -68,7 +93,12 @@ function apply(options, tabId, cb){
 
 function savepage(options, cb){
     //saveimages(options, cb);
-    savecss(options, cb);
+    savecss(options, function(a){
+		savejs(options, function(b){
+			$.extend(a,b);
+			cb(a);
+		});
+	});
 }
 
 function saveimages(options, cb){
@@ -77,63 +107,75 @@ function saveimages(options, cb){
     });
 }
 
-function savecss(options, cb){
-    var urls = [], modulos = 0, allcss = false;
+function savejs(options, cb){
+    var scripts = [], modulos = 0, ended = false;
     
-    $('link[rel="stylesheet"]').each(function(i, link){
-        var url = $(link).attr('href');
-        console.log('original:' + url);
-        url = resolveUrl(url);
-        console.log('resolved:' + url);
-        urls.push(url);
-        ++modulos;
-        $.get(url, function(data){
-            --modulos;
-            console.log('url:' + url);
-            var urlimports = checkImport(url, data);
-            if (urlimports && urlimports.length > 0) {
-                urls = urls.concat(urlimports);
-            }
-            if (allcss && modulos == 0) {
-                cb({
-                    location: window.location.href,
-                    urls: urls
-                });
-            }
-        });
-    });
-    allcss = true;
-}
-
-function resolveUrl(url, urlbase){
-    urlbase = urlbase || window.location.href;
-    //var res = noParameters(url);
-    var res = url;
-    
-    //urlbase should ends with /
-    if (!/\/$/.test(urlbase)) {
-        urlbase += '/';
-    }
-    if (!/^http/.test(res)) {
-        if (/^\//.test(res)) {
-            var n = /^https?:\/\/[^\/]*\//.exec(urlbase);
-            if (n && n[0]) {
-                res = n[0] + res;
-            }
+    $('script').each(function(i, el){
+        var s = {
+            url: $(el).attr('src')
+        };
+        if (s.url) {
+            s.url = absoluteUrl(s.url);
         } else {
-            //relative
-            res = urlbase + res;
+            s.code = $(el).text();
         }
-        res = cleanback(res);
-    }
-    return res;
+        
+        if (s.url) {
+            ++modulos;
+            $.get(s.url, function(data){
+                --modulos;
+                console.log('url:' + s.url);
+                scripts.push(s);
+                if (ended && modulos == 0) {
+                    cb({
+                        location: window.location.href,
+                        scripts: scripts
+                    });
+                }
+                
+            });
+        } else {
+            scripts.push(s);
+        }
+    });
+    ended = true;
 }
 
-function cleanback(url){
-    var res = url;
-    var res = res.replace(/^:\/\//g, '/');
-    var res = res.replace(/(\/[^\/]*\/\.\.)/g, '');
-    return res;
+function savecss(options, cb){
+    var styles = [], modulos = 0, ended = false;
+    
+    $('link[rel="stylesheet"]').each(function(i, el){
+		var s = {
+            url: $(el).attr('href')
+        };
+        if (s.url) {
+            s.url = absoluteUrl(s.url);
+        } else {
+            s.code = $(el).text();
+        }
+		
+        if (s.url) {
+			++modulos;
+			$.get(s.url, function(data){
+				--modulos;
+				console.log('url:' + url);
+				styles.push(s);
+				var urlimports = checkImport(url, data);
+				if (urlimports && urlimports.length > 0) {
+					styles.push(urlimports);
+				}
+				if (ended && modulos == 0) {
+					cb({
+						location: window.location.href,
+						styles: styles
+					});
+				}
+			});
+		}else {
+            styles.push(s);
+        }
+    });
+    ended = true;
 }
 
 function checkImport(url, data){
@@ -144,9 +186,9 @@ function checkImport(url, data){
         var uri = parseUri(url);
         var urlbase = uri.protocol + '://' + uri.authority + uri.directory;
         
-        var newurl = resolveUrl(m[1], urlbase);
+        var newurl = absoluteUrl(m[1], urlbase);
         console.log('urlbase:' + urlbase);
-        console.log('resolveUrl:' + newurl);
+        console.log('absoluteUrl:' + newurl);
         urls.push(newurl);
     }
     return urls;

@@ -6,7 +6,7 @@
  * @web xeoos.fr
  */
 var OPTIONS = {
-    editor: 'textarea', //bespin,codemirror,textarea
+    editor: 'bespin', //bespin,codemirror,textarea
     config: {
         codemirror: {
             js: {
@@ -21,7 +21,9 @@ var OPTIONS = {
             }
         }
     }
-}
+};
+
+
 var default_profiles = {
     'p1': {
         name: 'Hello google',
@@ -37,25 +39,32 @@ var default_profiles = {
     }
 };
 
-//div{border:5px solid red;}
 $(function(){
     var fullsize = (window.location.hash === '#full');
     $(document.body).toggleClass('full', fullsize);
     inittab();
-    //loadCombo();
-    initeditors({
-        css: {
-            syntax: 'css'
-        },
-        js: {
-            syntax: 'js',
-            then: function(){
-                loadCombo();
+    req('get', function(a){
+        console.log('get editor:' + a.value);
+        console.log(a);
+        OPTIONS.editor = a.value || OPTIONS.editor;
+        $('#teditor').val(OPTIONS.editor);
+        initeditors({
+            css: {
+                syntax: 'css'
+            },
+            js: {
+                syntax: 'js',
+                then: function(){
+                    loadCombo();
+                }
             }
-        }
+        });
+    }, {
+        name: 'editor'
     });
     
-    $('#btn-css').click(getcss);
+   
+	$('#btn-scan').click(scanPage);
     $('#btn-apply').click(applyprofile);
     $('#btn-save').click(saveprofile);
     $('#btn-new').click(newprofile);
@@ -65,6 +74,13 @@ $(function(){
     //$('#btn-html').click(testhtml);
     //$('#btn-toast').click(toastdemo);
     $('#btn-unpack').click(unpack);
+    $('#teditor').bind('change', function(){
+        req('set', null, {
+            name: 'editor',
+            value: $('#teditor').val()
+        });
+    })
+    
 });
 
 
@@ -202,18 +218,25 @@ function loadCombo(selected){
     });
 }
 
-function getcss(){
-    var options = {
+function scanPage(){
+	var options = {
         images: $('#chk_save_images').val(),
-        css: $('#chk_save_css').val()
+        css: $('#chk_save_css').val(),
+		unpack:$('#chk_unpack_js').val()
     };
     inject('scan', function(o){
-        /*$('#output').html('');
-         var ul = $('<ul></ul>').appendTo('#output');
-         ul.append('<li>' + o.location + '</li>');
-         $.each(o.urls, function(i, url){
-         ul.append('<li><a href="' + url + '">' + url + '</a></li>');
-         });*/
+        $('#output').html('');
+		function listItems(o, id,name, el){
+			$('<h2>'+name+'</h2>').appendTo(el);
+			var html='<li>' + o.location + '</li>', ul = $('<ul></ul>').appendTo(el);
+			$.each(o[id], function(i, s){
+				html+='<li><a href="' + s.url + '">' +  s.url + '</a></li>';
+				html+='<li>' + s.code + '</li>';
+			});
+			ul.append(html);
+		}
+		listItems(o, 'styles', 'CSS stylesheets', '#output');
+		listItems(o, 'scripts', 'Javascript files', '#output');
     }, options);
 }
 
@@ -353,7 +376,7 @@ function applyprofile(){
 }
 
 function unpack(){
-	inject('unpackpage', function(){
+    inject('unpackpage', function(){
         $().message("Unpack done!");
     });
 }
