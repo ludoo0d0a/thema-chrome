@@ -19,14 +19,15 @@ body {
     font-family: 'Trebuchet MS', Helvetica, Arial, sans-serif;
 }
 
-a {
-    color: #a03268;
+a, a:visited {
+    color: #9E9E9E;
     text-decoration: none;
 }
 
 a:hover {
-    color: #e88bb9;
+    color: #FEFEFE;
 }
+
 
 /* Gestion des titres */
 h1, h2, h3, h4, h5, h6, dl, dt, dd, img, p, img a, img {

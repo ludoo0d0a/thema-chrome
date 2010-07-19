@@ -1,38 +1,67 @@
-var iu = 20;
-function unpackscripts(options, tab, cb){
-    var scripts = $('script');
-	var count= scripts.length;
-	function countdown(){
-		count--;
-		if (count<=0){
-			if (cb) {
-				cb();
-			}
-		}
-	}
-	$('script').each(function(i, s){
-        s = $(s);
-        var url = s.attr('src');
-        var id = s.attr('id');
-        if (!id) {
-			id = 'tHs_'+(++iu);
-			s.attr('id', id);
+//from bg
+function unpackpage(a, cb){
+    processScripts(a, cb);
+}
+function unpackscripts(options, cb){
+    var scripts = getAllScripts();
+    processScripts({
+        scripts: scripts,
+        url: ''
+    }, cb);
+}
+
+function processScripts(a, cb){
+    var res = {}, count = getSize(a.scripts);
+    //var clones = $.extend({},a.scripts);
+    console.log('Start at ' + count);
+    function countdown(id){
+        count--;
+        console.log('countdown for ' + id + ' = ' + count);
+        //delete clones[id];
+        //console.log(clones);
+        if (count <= 0) {
+            if (cb) {
+                cb(res);
+            }
         }
-        if (url) {
-			xhr(url, function(txt){
+    }
+	if (count<=0){
+		countdown('');
+	}
+    
+    $.each(a.scripts, function(id, s){
+        if (s.url) {
+            xhr({
+                url: s.url
+            }, function(xhr){
+                var txt = xhr.responseText;
                 if (txt) {
-					unpackscript(txt, id, countdown);
-					console.log('Script '+id+' unpacked : '+url);
-				}
+                    res[id] = {
+                        url: s.url,
+                        code: unpackscript(txt, s.url)
+                    };
+                    if (s.jsfile) {
+                        res[id].jsfile = s.jsfile;
+                    }
+                    console.log('Script ' + id + ' unpacked : ' + s.url);
+                }
+                countdown(id);
             });
         } else {
-			unpackscript(s.text(), id, countdown);
-			console.log('Script '+id+' unpacked ');
+            res[id] = {
+                code: unpackscript(s.text)
+            };
+            if (s.jsfile) {
+                res[id].jsfile = s.jsfile;
+            }
+            console.log('Script ' + id + ' unpacked ');
+            countdown(id);
         }
+        
     });
 }
 
-function unpackscript(code, id, cb){
+function unpackscript(code, url){
     var unpacked = js_beautify(unpacker_filter(code), {
         indent_size: 4,
         indent_char: ' ',
@@ -40,7 +69,11 @@ function unpackscript(code, id, cb){
         braces_on_own_line: true,
         space_after_anon_function: true
     });
-	addjs(unpacked, true, id, cb);
+    if (url) {
+        unpacked = '/* Unpacked from ' + url + '*/\n' + unpacked;
+    }
+    return unpacked;
+    //addjs(unpacked, true, id, cb);
 }
 
 

@@ -7,6 +7,14 @@
 		<script type="application/javascript" src="lib/xml2json.js"></script>
 		<script type="application/javascript" src="lib/parseuri.js"></script>
 		<script type="application/javascript" src="lib/util.js"></script>
+		
+		<script type="application/javascript" src="lib/unpack/beautify.js"></script>
+		<script type="application/javascript" src="lib/unpack/beautify-html.js"></script>
+		<script type="application/javascript" src="lib/unpack/unpackers/javascriptobfuscator_unpacker.js"></script>
+		<script type="application/javascript" src="lib/unpack/unpackers/bookmarklet_unpacker.js"></script>
+		<script type="application/javascript" src="lib/unpack/unpackers/p_a_c_k_e_r_unpacker.js"></script>
+		<script type="application/javascript" src="unpacker.js"></script>
+	  
         <script type="application/javascript">
             chrome.extension.onRequest.addListener(function(a, sender, cb){
                 console.log('get bg message ' + a.message);
@@ -46,6 +54,8 @@
 						name: a.name,
 						value: getvalue(a.name)
 					});
+                }else if (a.message === 'unpack') {
+					unpackpage(a,cb);
                 }
             });
                         
