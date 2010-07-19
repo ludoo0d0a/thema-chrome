@@ -1,14 +1,14 @@
-req('dataprofiles', function(profiles){
+req('profiles', function(profiles){
     var url = window.location.href;
-    console.log(url);
-    console.log(profiles);
     $.each(profiles, function(id, p){
         if (p && p.url) {
-            var re = new RegExp(encodeRE(p.url));
-            if (re.test(url)) {
-                console.log('Apply profile ' + id + ' / ' + p.url);
-                apply(p);
-            }
+            $.each(p.url, function(i, u){
+				var re = new RegExp(encodeRE(u));
+	            if (re.test(url)) {
+	                console.log('Apply profile ' + id + ' / ' + u);
+	                apply(p);
+	            }
+			});
         }
     });
 });
