@@ -1,7 +1,7 @@
 /**
  * tHema script Sample
  */
-//@require jquery //
+//@require jquery
 tHema.onReady = function(){
    console.log('jQuery ' + jQuery.fn.jquery + ' loaded!!');
    
