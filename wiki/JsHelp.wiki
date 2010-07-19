@@ -1,0 +1,56 @@
+#summary Help on Javascript import rules
+
+= Introduction =
+
+This document will help you to know syntax to improve injected scripts.
+
+
+= Details =
+Default code : 
+{{{
+/**
+ * tHema script Sample
+ */
+//@require jquery
+tHema.onReady = function(){
+   console.log('jQuery ' + jQuery.fn.jquery + ' loaded!!');
+   
+   setInterval(function(){
+   	jQuery('img,input,select,textarea').toggle();
+   },2000);
+}
+}}}
+
+
+tHema is bootstrap dedicated to jQuery loading.
+tHema get following events : 
+  * onLoad : fires after jQuery loading, such jQuery()
+  * onReady : fires after jQuery loading, such jQuery(document).ready()
+
+== Instructions ==
+
+=== @Require ===
+
+Syntax : Add this line at the start of the script
+//@require {lib} {version}
+
+where : 
+  * {lib} could be one the following values
+  * {version} optional version, 1 by default means last available version
+
+  * *greasekit* : Greasekit (GreaseMonkey compatibility for userscripts)
+  * *userscript*: http://userscripts.org/scripts/source/{version}.user.js
+  * *jquery*: jQuery + bootstrap
+  * *jqueryui*: jQueryUI
+  * *prototype*: Prototype
+  * *scriptaculous*: Scriptaculous
+  * *yui*: YUI
+  * *mootools*: Mootools
+  * *dojo*: Dojo
+  * *extjs*: ExtJs (Sencha)
+  * *jlinq*: jlinq
+
+
+Custom script inclusion could be using an URL : 
+//@require {url}
+//@require http://myserver.com/js/myscript.js
