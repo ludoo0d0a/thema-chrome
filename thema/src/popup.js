@@ -5,10 +5,35 @@
  * @web pitaso.com
  * @web xeoos.fr
  */
-var samples = {
-    profiles: {
-        1: 'p1',
-        2: 'p2'
+var OPTIONS = {
+    editor: 'textarea', //bespin,codemirror,textarea
+    config: {
+        codemirror: {
+            js: {
+                parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+                stylesheet: "lib/codemirror/css/jscolors.css",
+                path: "lib/codemirror/js/"
+            },
+            css: {
+                parserfile: "parsecss.js",
+                stylesheet: "lib/codemirror/css/csscolors.css",
+                path: "lib/codemirror/js/"
+            }
+        }
+    }
+}
+var default_profiles = {
+    'p1': {
+        name: 'Hello google',
+        url: 'google.com',
+        js: "console.log('Hello world');",
+        css: '/* No CSS */ '
+    },
+    'p2': {
+        name: 'Alert google',
+        url: 'google.com',
+        js: "alert('Hello world');",
+        css: 'body{background-color:red !important;}'
     }
 };
 
@@ -17,25 +42,15 @@ $(function(){
     var fullsize = (window.location.hash === '#full');
     $(document.body).toggleClass('full', fullsize);
     inittab();
-    loadCombo();
-    initbespin({
+    //loadCombo();
+    initeditors({
         css: {
             syntax: 'css'
         },
         js: {
             syntax: 'js',
             then: function(){
-                //reopen last codes not saved
-                req('get', function(o){
-                    setDataProfile(o.value);
-                    //second time to override saved values (and activate changed flag)
-                    setTimeout(function(){
-                        setDataValues(o.value);
-						$('#changed').hide();
-                    }, 500);
-                }, {
-                    name: 'auto'
-                });
+                loadCombo();
             }
         }
     });
@@ -52,15 +67,25 @@ $(function(){
 });
 
 
-function initbespin(configs){
-    window.onBespinLoad = function(){
+function initeditors(configs){
+    if (OPTIONS.editor === 'bespin') {
+        window.onBespinLoad = function(){
+            $.each(configs, function(id, config){
+                setbespin(id, config);
+            });
+        }
+    } else if (OPTIONS.editor === 'codemirror') {
         $.each(configs, function(id, config){
-            setbespin(id, config);
+            setcodemirror(id, config);
+        });
+    } else {
+        $.each(configs, function(id, config){
+            settextarea(id, config);
         });
     }
 }
 
-var editors = {};
+var editors = {}, cmeditors = {};
 function setbespin(id, config, title){
     var o = config || {};
     o.stealFocus = true;
@@ -74,26 +99,54 @@ function setbespin(id, config, title){
         editors[id] = env.editor;
         editors[id].textChanged.add(function(oldRange, newRange, newVal){
             if (newVal) {
-                if (!editors[id]._textChanged) {
-                    $('#changed').show();
-                    editors[id]._textChanged = true;
-                }
-                if (!editors[id]._autosave) {
-                    var data = getData();
-                    data.tab = getCurrentTab();
-                    req('set', {
-                        name: 'auto',
-                        value: data
-                    });
-                }
+                ontextchanged(id);
             }
         });
-        $('#changed').hide();
         if (config.then) {
             config.then();
         }
     });
+}
+
+function settextarea(id, config, title){
+    editors[id] = $("<textarea class='ted'></textarea>");
+    editors[id].bind('keyup', function(){
+        ontextchanged(id);
+    })
+    editors[id].appendTo($('#tx_' + id));
+    if (config.then) {
+        config.then();
+    }
+}
+
+function setcodemirror(id, config, title){
+    settextarea(id, config, title);
+	var tid = 'tx_' + id;
+    var textarea = document.getElementById(tid);
     
+    var config = OPTIONS.config.codemirror[id] || {};
+    $.extend(config, {
+        height: "350px",
+        content: textarea.value,
+        autoMatchParens: true
+    });
+    
+    cmeditors[id] = CodeMirror.fromTextArea(tid, config);
+}
+
+function ontextchanged(){
+    if (!editors[id]._textChanged) {
+        $('#changed').show();
+        editors[id]._textChanged = true;
+    }
+    if (!editors[id]._autosave) {
+        var data = getData();
+        data.tab = getCurrentTab();
+        req('set', {
+            name: 'auto',
+            value: data
+        });
+    }
 }
 
 function toggleauto(e){
@@ -109,7 +162,7 @@ function formatComboData(profiles, selected){
     $.each(profiles, function(i, p){
         r.push({
             value: i,
-            text: p,
+            text: p.name,
             selected: (selected && selected === i)
         });
     });
@@ -119,7 +172,13 @@ function formatComboData(profiles, selected){
 function loadCombo(selected){
     setData({});
     req('profiles', function(data){
-        profiles = data || samples.profiles;
+        if (data) {
+            profiles = data;
+        } else {
+            profiles = default_profiles;
+            selected = 'p1';
+        }
+        //profiles = data || default_profiles;
         var p = formatComboData(profiles, selected);
         //clear previous sexy combo
         $("#ctn-profile").html('');
@@ -132,12 +191,12 @@ function loadCombo(selected){
             autoFill: true,
             changeCallback: function(){
                 //change profile
-                openprofile(this.hidden.val());
+                openprofile(this.hidden.val(), profiles);
             }
         });
         if (selected) {
             console.log('open new selected profile ' + selected);
-            openprofile(selected);
+            openprofile(selected, profiles);
         }
     });
 }
@@ -159,12 +218,23 @@ function getcss(){
 
 function getData(){
     //updatevalue();
-    return {
+    var o = {
         name: $('#tx_name').val(),
-        url: $('#tx_url').val().split('\n'),
-        js: (editors.js) ? editors.js.value : '',
-        css: (editors.css) ? editors.css.value : ''
+        url: $('#tx_url').val().split('\n')
     }
+    
+    if (OPTIONS.editor === 'bespin') {
+        o.js = editors.js.value || '';
+        o.css = editors.css.value || '';
+    } else if (OPTIONS.editor === 'codemirror') {
+        o.js = cmeditors.js.getCode() || '';
+        o.css = cmeditors.css.getCode() || '';
+    } else {
+        o.js = editors.js.val() || '';
+        o.css = editors.css.val() || '';
+    }
+    
+    return o;
 }
 
 function setData(data){
@@ -180,12 +250,14 @@ function setDataProfile(data){
             url = data.url.join('\n');
         }
         $('#tx_url').val(url);
+    } else {
+        data = data || {};
     }
     var s = data.tab || getCurrentTab();
-    if (!data.css && s == 'css') {
+    if (data.js && !data.css && s == 'css') {
         //set focus on js
         setTab('js');
-    } else if (!data.js && s == 'js') {
+    } else if (data.css && !data.js && s == 'js') {
         //set focus on css
         setTab('css');
     }
@@ -193,11 +265,36 @@ function setDataProfile(data){
 }
 
 function setDataValues(data){
-    if (editors.js && data.js) {
-        editors.js.value = data.js || '';
+    if (data.js) {
+        if (OPTIONS.editor === 'bespin') {
+            if (editors.js) {
+				editors.js.value = data.js || '';
+			}
+        } else if (OPTIONS.editor === 'codemirror') {
+            if (cmeditors.js) {
+				cmeditors.js.setCode(data.js || '');
+			}
+        } else {
+            if (editors.js) {
+				editors.js.val(data.js || '');
+			}
+        }
     }
-    if (editors.css && data.css) {
-        editors.css.value = data.css || '';
+    
+    if (data.css) {
+        if (OPTIONS.editor === 'bespin') {
+            if (editors.css) {
+				editors.css.value = data.css || '';
+			}
+        } else if (OPTIONS.editor === 'codemirror') {
+            if (cmeditors.css) {
+				cmeditors.css.setCode(data.css || '');
+			}
+        } else {
+            if (editors.css) {
+				editors.css.val(data.css || '');
+			}
+        }
     }
 }
 
@@ -224,15 +321,15 @@ function logme(){
 }
 
 function saveprofile(){
-    var id = cbo.getHiddenValue(), name = cbo.getCurrentTextValue();
-    savemyprofile(id, name, getData());
+    var id = cbo.getHiddenValue();
+    savemyprofile(id, getData());
 }
 
 function newprofile(){
-    savemyprofile(null, null, {});
+    savemyprofile(null, {});
 }
 
-function savemyprofile(id, name, data){
+function savemyprofile(id, data){
     if (!id) {
         req('new', function(p){
             if (p) {
@@ -247,7 +344,6 @@ function savemyprofile(id, name, data){
             id: id,
             data: data
         };
-        o.data.name = name;
         //save
         req('save', function(){
             $().message("Profile " + name + " saved!");
@@ -272,17 +368,21 @@ function unpack(){
 });
 }
 
-function openprofile(id){
+function openprofile(id, pdata){
     console.log('open profile ' + id);
-    req('open', function(data){
-        console.log('open profile data=');
-        console.log(data);
-        data = data || {};
-        setData(data);
-    }, {
-        id: id,
-        data: getData()
-    });
+    $('#changed').hide();
+    if (pdata) {
+        setData(pdata[id]);
+    } else {
+        req('open', function(data){
+            console.log('open profile data=');
+            console.log(data);
+            data = data || {};
+            setData(data);
+        }, {
+            id: id
+        });
+    }
 }
 
 
@@ -306,7 +406,8 @@ function getCurrentTab(){
     if (tabs && tabs.getCurrentTab) {
         return tabs.getCurrentTab().attr('id').replace(/^tab_/, '');
     } else {
-        return false;
+        var li = $("ul.tabs li a.current").parents()[0];
+        return $(li).attr('id').replace(/^tab_/, '');
     }
     
 }

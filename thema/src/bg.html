@@ -32,15 +32,8 @@
                 } else if (a.message === 'del') {
                     callb(cb, delprofile(a));
                 } else if (a.message === 'profiles') {
-                    var profiles = getvalue('profiles', {});
+                    var profiles = getProfiles();
                     callb(cb, profiles);
-                } else if (a.message === 'dataprofiles') {
-                    var profiles = getvalue('profiles', {});
-                    var p = {};
-                    $.each(profiles, function(id, name){
-                        p[id] = openprofileid(id)
-                    });
-                    callb(cb, p);
                 } else if (a.message === 'addjs') {
                     addjs(a, cb);
                 } else if (a.message === 'addcss') {
@@ -78,14 +71,14 @@
                 }
                 localStorage.setItem(name, v);
             }
+			
+			function getProfiles(){
+				return getvalue('profiles');
+			}
             
             function openprofile(a){
-                a.data = a.data || {};
-                return openprofileid(a.id);
-            }
-            
-            function openprofileid(id){
-                return getvalue('profile_' + id);
+                var values = getProfiles();
+				return values[a.id] || {};
             }
             
             function newprofile(a, cb, url){
@@ -96,22 +89,18 @@
                     });
                 }
                 
-                a = a || {};
-                a.data = a.data || {};
-                var o = true, id = 0;
-                while (o) {
-                    o = getvalue('profile_p' + ++id, false);
-                }
+               var values = getProfiles();
+			   var id = 'p'+(values.length+1);
                 
-                function gonewprofile(xhr){
-                    var js = "//@require jquery //\ntHema.onLoad=function(){\n\tjQuery(document).ready(function(){\n\t\tconsole.log('jQuery loaded!!');\n\t});\n}\n";
+                function getDefaultProfile(xhr){
+                    var js = '';
                     if (xhr && xhr.responseText) {
                         js = xhr.responseText;
                     }
                     var p = {
-                        id: 'p' + id,
+                        id: id,
                         data: {
-                            name: 'My profile ' + id,
+                            name: 'My profile for '+ url,
                             url: url,
                             js: js,
                             css: '/* Empty CSS stylesheet */'
@@ -120,30 +109,25 @@
                     saveprofile(p);
                     callb(cb, p);
                 }
+				
                 request({
                     url: 'res/jquery/default.js'
-                }, true, gonewprofile);
-                gonewprofile();
+                }, true, getDefaultProfile);
+				
             }
             
             function delprofile(a){
-                var o = delvalue('profile_' + a.id);
-                
-                var values = getvalue('profiles', {});
+                var values = getProfiles();
                 delete values[a.id];
                 setvalue('profiles', values);
-                
                 return o;
             }
             
             
             function saveprofile(a){
                 if (a.data && a.id) {
-                    setvalue('profile_' + a.id, a.data);
-                    
-                    var values = getvalue('profiles', {});
-                    values[a.id] = a.data.name || '';
-                    setvalue('profiles', values);
+                    var values = getProfiles();
+                    values[a.id] = a.data;
                     return true;
                 } else {
                     return false;

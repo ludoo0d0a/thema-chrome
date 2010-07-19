@@ -56,3 +56,6 @@ ol{
 #panel-settings {
 	padding: 15px;
 }
+#panel-settings p{
+	margin-top: 10px;
+}
