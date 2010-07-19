@@ -18,7 +18,7 @@ function serializeXml(nodes){
 
 function getUrlDomain(url){
 	var p = parseUri(url);
-	return p.protocol+'//'+p.authority;
+	return p.authority;
 }
 
 function isArray(obj){
@@ -55,4 +55,12 @@ function addjs(script, inline, id, cb, scope, time){
             cb.call(scope || this);
         }, time || 500);
     }
+}
+
+function getSize(o){
+	var c= 0;
+	$.each(o, function(i,a){
+		c++;
+	});
+	return c;
 }

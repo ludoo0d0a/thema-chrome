@@ -73,7 +73,7 @@
             }
 			
 			function getProfiles(){
-				return getvalue('profiles');
+				return getvalue('profiles', {});
 			}
             
             function openprofile(a){
@@ -82,15 +82,15 @@
             }
             
             function newprofile(a, cb, url){
-                if (!url) {
-                    return getUrl(function(uri){
-                        var domain = getUrlDomain();
+				if (!url) {
+                    return getSelectedTabUrl(function(uri){
+                        var domain = getUrlDomain(uri);
 						newprofile(a, cb, domain);
                     });
                 }
                 
                var values = getProfiles();
-			   var id = 'p'+(values.length+1);
+			   var id = 'p'+(getSize(values)+1);
                 
                 function getDefaultProfile(xhr){
                     var js = '';
@@ -118,9 +118,11 @@
             
             function delprofile(a){
                 var values = getProfiles();
-                delete values[a.id];
-                setvalue('profiles', values);
-                return o;
+				if (values[a.id]) {
+					delete values[a.id];
+					setvalue('profiles', values);
+				}
+                return values;
             }
             
             
@@ -128,6 +130,7 @@
                 if (a.data && a.id) {
                     var values = getProfiles();
                     values[a.id] = a.data;
+					setvalue('profiles', values);
                     return true;
                 } else {
                     return false;
@@ -166,7 +169,7 @@
                 });
             }
             
-            function getUrl(cb){
+            function getSelectedTabUrl(cb){
                 chrome.tabs.getSelected(null, function(tab){
                     cb(tab.url);
                 });

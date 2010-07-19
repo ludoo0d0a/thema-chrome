@@ -61,6 +61,7 @@ $(function(){
     $('#btn-new').click(newprofile);
     $('#btn-del').click(delprofile);
     $('#btn-auto').click(toggleauto);
+    $('#btn-load').click(loadCombo);
     //$('#btn-html').click(testhtml);
     //$('#btn-toast').click(toastdemo);
     $('#btn-unpack').click(unpack);
@@ -121,7 +122,7 @@ function settextarea(id, config, title){
 
 function setcodemirror(id, config, title){
     settextarea(id, config, title);
-	var tid = 'tx_' + id;
+    var tid = 'tx_' + id;
     var textarea = document.getElementById(tid);
     
     var config = OPTIONS.config.codemirror[id] || {};
@@ -238,21 +239,19 @@ function getData(){
 }
 
 function setData(data){
+    data = data || {};
     setDataProfile(data);
     setDataValues(data);
 }
 
 function setDataProfile(data){
-    if (data) {
-        $('#tx_name').val(data.name);
-        var url = data.url;
-        if (isArray(data.url)) {
-            url = data.url.join('\n');
-        }
-        $('#tx_url').val(url);
-    } else {
-        data = data || {};
+    $('#tx_name').val(data.name || '');
+    var url = data.url || '';
+    if (isArray(data.url)) {
+        url = data.url.join('\n');
     }
+    $('#tx_url').val(url);
+    
     var s = data.tab || getCurrentTab();
     if (data.js && !data.css && s == 'css') {
         //set focus on js
@@ -261,39 +260,29 @@ function setDataProfile(data){
         //set focus on css
         setTab('css');
     }
-    
 }
 
 function setDataValues(data){
-    if (data.js) {
-        if (OPTIONS.editor === 'bespin') {
-            if (editors.js) {
-				editors.js.value = data.js || '';
-			}
-        } else if (OPTIONS.editor === 'codemirror') {
-            if (cmeditors.js) {
-				cmeditors.js.setCode(data.js || '');
-			}
-        } else {
-            if (editors.js) {
-				editors.js.val(data.js || '');
-			}
+    if (OPTIONS.editor === 'bespin') {
+        if (editors.js) {
+            editors.js.value = data.js || '';
         }
-    }
-    
-    if (data.css) {
-        if (OPTIONS.editor === 'bespin') {
-            if (editors.css) {
-				editors.css.value = data.css || '';
-			}
-        } else if (OPTIONS.editor === 'codemirror') {
-            if (cmeditors.css) {
-				cmeditors.css.setCode(data.css || '');
-			}
-        } else {
-            if (editors.css) {
-				editors.css.val(data.css || '');
-			}
+        if (editors.css) {
+            editors.css.value = data.css || '';
+        }
+    } else if (OPTIONS.editor === 'codemirror') {
+        if (cmeditors.js) {
+            cmeditors.js.setCode(data.js || '');
+        }
+        if (cmeditors.css) {
+            cmeditors.css.setCode(data.css || '');
+        }
+    } else {
+        if (editors.js) {
+            editors.js.val(data.js || '');
+        }
+        if (editors.css) {
+            editors.css.val(data.css || '');
         }
     }
 }
@@ -304,7 +293,8 @@ function delprofile(){
         var id = $('#selprofile').val();
         var sibling = $('#selprofile :selected').prev() || $('#selprofile :selected').next();
         req('del', function(){
-            loadCombo(sibling.val());
+            //loadCombo(sibling.val());
+            loadCombo();
             $().message("Profile " + name + " deleted!");
         }, {
             id: id
@@ -338,7 +328,7 @@ function savemyprofile(id, data){
             } else {
                 $().message("Profile creation failed!");
             }
-        }, {});
+        });
     } else {
         var o = {
             id: id,
@@ -348,6 +338,7 @@ function savemyprofile(id, data){
         req('save', function(){
             $().message("Profile " + name + " saved!");
             $('#changed').hide();
+            loadCombo(id);
         }, o);
     }
 }
