@@ -97,7 +97,7 @@
 	float:left;
 }
 #btn-css{
-	width:45px;
+	width:25px;
 	float:left;
 }
 #btn-save{
@@ -112,5 +112,6 @@
 	width:30px;
 	float:right;
 }
-
-
+#btn-search{
+	width:80px;
+}

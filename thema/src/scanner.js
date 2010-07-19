@@ -27,13 +27,31 @@ chrome.extension.onConnect.addListener(function(port){
                 req('bg-apply');
             });
         }else if (a.message === 'unpack') {
-            unpackscripts(a.options.data, a.tab, function(res){
+			unpackscripts(a.options.data, a.tab, function(res){
                 //req('unpackdone');
             });
+        }else if (a.message === 'unpackpage') {
+			var s = getAllScripts();
+			req('unpack', function(a){
+				replaceScripts(a);
+				$().message("Unpack done!");
+			}, {
+				scripts:s
+			});
+			
         }
     });
 });
 
+function replaceScripts(scripts){
+	$.each(scripts, function(id,s){
+		if (s.jsfile) {
+			document.write(s.code);
+		} else {
+			addjs(s.code, true, id);
+		}
+	});
+}
 
 
 var mytabId;

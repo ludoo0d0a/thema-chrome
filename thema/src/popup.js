@@ -61,7 +61,7 @@ $(function(){
     $('#btn-new').click(newprofile);
     $('#btn-del').click(delprofile);
     $('#btn-auto').click(toggleauto);
-    $('#btn-load').click(loadCombo);
+    //$('#btn-load').click(loadCombo);
     //$('#btn-html').click(testhtml);
     //$('#btn-toast').click(toastdemo);
     $('#btn-unpack').click(unpack);
@@ -353,10 +353,9 @@ function applyprofile(){
 }
 
 function unpack(){
-    inject('unpack', function(){
+	inject('unpackpage', function(){
         $().message("Unpack done!");
-    }, { //no option for the moment
-});
+    });
 }
 
 function openprofile(id, pdata){

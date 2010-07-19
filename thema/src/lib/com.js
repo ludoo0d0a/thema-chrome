@@ -17,7 +17,7 @@ function req(message, cb, data){
 	}
 }
 
-function xhr(url, cb){
+function requesttext(url, cb){
 	req('xhr', function(xhr){
 		if (xhr.status == 200) {
 			cb(xhr.responseText);
