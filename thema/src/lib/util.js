@@ -105,6 +105,7 @@ function removeTrailingSlash(text){
 
 function absoluteUrl(url, urlpage){
     var u = url;
+	urlpage = urlpage || window.location.href;
     if (/^\//.test(url)) {
         //add domain
         var p = parseUri(urlpage);

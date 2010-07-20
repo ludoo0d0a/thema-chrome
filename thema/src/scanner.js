@@ -45,7 +45,7 @@ chrome.extension.onConnect.addListener(function(port){
         //console.log('get content message ' + a.message);
         if (a.message === 'scan') {
             savepage(a.options, function(res){
-                req('bg-scan');
+                req('bg-scan', false, res);
             });
         } else if (a.message === 'apply') {
             apply(a.options.data, a.tab, function(res){
@@ -111,8 +111,9 @@ function savejs(options, cb){
     var scripts = [], modulos = 0, ended = false;
     
     $('script').each(function(i, el){
-        var s = {
-            url: $(el).attr('src')
+        var url = $(el).attr('src');
+		var s = {
+            url: url
         };
         if (s.url) {
             s.url = absoluteUrl(s.url);
@@ -145,8 +146,9 @@ function savecss(options, cb){
     var styles = [], modulos = 0, ended = false;
     
     $('link[rel="stylesheet"]').each(function(i, el){
+		var url = $(el).attr('href');
 		var s = {
-            url: $(el).attr('href')
+            url: url
         };
         if (s.url) {
             s.url = absoluteUrl(s.url);

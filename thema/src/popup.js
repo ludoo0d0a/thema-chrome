@@ -224,20 +224,7 @@ function scanPage(){
         css: $('#chk_save_css').val(),
 		unpack:$('#chk_unpack_js').val()
     };
-    inject('scan', function(o){
-        $('#output').html('');
-		function listItems(o, id,name, el){
-			$('<h2>'+name+'</h2>').appendTo(el);
-			var html='<li>' + o.location + '</li>', ul = $('<ul></ul>').appendTo(el);
-			$.each(o[id], function(i, s){
-				html+='<li><a href="' + s.url + '">' +  s.url + '</a></li>';
-				html+='<li>' + s.code + '</li>';
-			});
-			ul.append(html);
-		}
-		listItems(o, 'styles', 'CSS stylesheets', '#output');
-		listItems(o, 'scripts', 'Javascript files', '#output');
-    }, options);
+    inject('scan',false, options);
 }
 
 function getData(){
@@ -388,8 +375,8 @@ function openprofile(id, pdata){
         setData(pdata[id]);
     } else {
         req('open', function(data){
-            console.log('open profile data=');
-            console.log(data);
+            //console.log('open profile data=');
+            //console.log(data);
             data = data || {};
             setData(data);
         }, {
