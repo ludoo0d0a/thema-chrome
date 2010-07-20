@@ -53,9 +53,9 @@ ol{
 /**
  * Settings panel
  */
-#panel-settings {
+.panel-ctn {
 	padding: 15px;
 }
-#panel-settings p{
+.panel-ctn p{
 	margin-top: 10px;
 }

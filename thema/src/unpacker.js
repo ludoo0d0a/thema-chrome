@@ -1,17 +1,30 @@
 //from bg
 function unpackpage(a, cb){
-    processScripts(a, cb);
-}
-function unpackscripts(options, cb){
-    var scripts = getAllScripts();
-    processScripts({
-        scripts: scripts,
-        url: ''
-    }, cb);
+	mergeResources(a.scripts, a.styles, cb);
 }
 
-function processScripts(a, cb){
-    var res = {}, count = getSize(a.scripts);
+//deprecated
+/*function unpackscripts(options, cb){
+	var scripts = getAllScripts();
+	var styles = getAllStyles();
+	mergeResources(scripts, styles, cb);
+}*/
+	
+function mergeResources(scripts, styles, cb){
+	var files = {};
+	$.each(scripts, function(i,s){
+		files[i]=s;
+		files[i].type='js';
+	});
+	$.each(styles, function(i,s){
+		files[i]=s;
+		files[i].type='css';
+	});
+    processResources(files, cb);
+}
+
+function processResources(files, cb){
+    var res = {}, count = getSize(files);
     //var clones = $.extend({},a.scripts);
     console.log('Start at ' + count);
     function countdown(id){
@@ -29,8 +42,10 @@ function processScripts(a, cb){
 		countdown('');
 	}
     
-    $.each(a.scripts, function(id, s){
-        if (s.url) {
+	//jsfile for js page
+    $.each(files, function(id, s){
+        var urlPage = getUrlBase(s.url);
+		if (s.url) {
             xhr({
                 url: s.url
             }, function(xhr){
@@ -38,27 +53,60 @@ function processScripts(a, cb){
                 if (txt) {
                     res[id] = {
                         url: s.url,
-                        code: unpackscript(txt, s.url)
+						type:s.type
                     };
-                    if (s.jsfile) {
+					if (s.type==='js'){
+						 res[id].code = unpackscript(txt, s.url);
+						 console.log('Script ' + id + ' unpacked : ' + s.url);
+					}else{
+						res[id].code = resolveUrlCss(txt, s.url, urlPage);
+						console.log('Style ' + id + ' : ' + s.url);
+					}
+					
+					if (s.file) {
                         res[id].jsfile = s.jsfile;
                     }
-                    console.log('Script ' + id + ' unpacked : ' + s.url);
                 }
                 countdown(id);
             });
         } else {
             res[id] = {
-                code: unpackscript(s.text)
-            };
+				type:s.type
+			};
+			if (s.type === 'js') {
+				res[id].code = unpackscript(s.text);
+				console.log('Inline script ' + id + ' unpacked ');
+			}else{
+				res[id].code = s.text;
+				console.log('Inline stylesheet ' + id);
+			}
             if (s.jsfile) {
                 res[id].jsfile = s.jsfile;
             }
-            console.log('Script ' + id + ' unpacked ');
             countdown(id);
         }
-        
     });
+}
+
+function resolveUrlCss(code, url, urlPage){
+	var c = code.replace(/url\(([^\)]*)/, function(text,url,pos){
+		console.log('replaced '+url);
+		url = url.replace(/^["']/,'').replace(/["']$/,'')
+		var u = absoluteUrl(url,urlPage);
+		console.log('with  '+u);
+		return u;
+	});
+	c='/* From '+url + '*/\n'+unpackcss(c);
+	return c;
+}
+
+function unpackcss(code){
+	var c = code;
+	//compact
+	code = code.replace(/[\s\t]+/g, ' ');
+	//expand
+	code = code.replace(/}/g, '}\n').replace(/,/g, ',\n').replace(/\n+/g, '\n');
+	return c;
 }
 
 function unpackscript(code, url){
@@ -85,7 +133,6 @@ function trim_leading_comments(str){
 }
 
 function unpacker_filter(source){
-
     var stripped_source = trim_leading_comments(source);
     var unpacked = '';
     
@@ -109,8 +156,6 @@ function unpacker_filter(source){
             return unpacker_filter(unpacked);
         }
     }
-    
     return source;
-    
 }
 

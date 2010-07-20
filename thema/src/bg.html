@@ -15,7 +15,7 @@
         <script type="application/javascript" src="unpacker.js"></script>
         <script type="application/javascript">
             chrome.extension.onRequest.addListener(function(a, sender, cb){
-                console.log('get bg message ' + a.message);
+               // console.log('get bg message ' + a.message);
                 if (a.message === 'xhr') {
                     request(a, false, cb);
                 } else if (a.message === 'toast') {
@@ -304,8 +304,6 @@
                             statusText: xhr.statusText,
                             request: a
                         }
-                        console.log(xhr);
-                        
                         if (a.xpath && xhr.responseXML) {
                             if (typeof a.xpath === 'string') {
                                 a.xpath = {

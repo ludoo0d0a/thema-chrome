@@ -3,7 +3,7 @@ req('profiles', function(profiles){
     $.each(profiles, function(id, p){
         if (p && p.url) {
             $.each(p.url, function(i, u){
-				var re = new RegExp(encodeRE(u));
+                var re = new RegExp(encodeRE(u));
                 if (re.test(url)) {
                     //console.log('Apply profile ' + id + ' / ' + u);
                     apply(p);
@@ -38,7 +38,31 @@ function autoIntall(){
         }));
     }
 }
-autoIntall();
+
+req('get', function(a){
+    if (a.value) {
+        autoIntall();
+    }
+}, {
+    name: 'autoinstall'
+});
+
+/*
+var port = chrome.extension.connect({name: "popup_tHema"});
+
+chrome.extension.onRequest.addListener(
+  function(request, sender, sendResponse) {
+    sendResponse({counter: request.counter+1});
+  });
+*/
+function sendMessage(msg){
+	/*if (port) {
+		port.postMessage({
+			message: 'info',
+			text: msg
+		});
+	}*/
+}
 
 chrome.extension.onConnect.addListener(function(port){
     port.onMessage.addListener(function(a){
@@ -50,30 +74,36 @@ chrome.extension.onConnect.addListener(function(port){
         } else if (a.message === 'apply') {
             apply(a.options.data, a.tab, function(res){
                 req('bg-apply');
+				sendMessage("Current profile applied to current page!");
             });
-        } else if (a.message === 'unpack') {
-            unpackscripts(a.options.data, a.tab, function(res){
-                //req('unpackdone');
-            });
-        } else if (a.message === 'unpackpage') {
-            var s = getAllScripts();
+        }else if (a.message === 'unpackpage') {
+            var scripts = getAllScripts();
+            var styles = getAllStyles();
             req('unpack', function(a){
-                replaceScripts(a);
-                //$().message("Unpack done!");
+                replaceResources(a);
+				//callback to popup to show message?
+				sendMessage("Page is now unpacked!");
             }, {
-                scripts: s
+                scripts: scripts,
+                styles: styles
             });
             
         }
     });
 });
 
-function replaceScripts(scripts){
-    $.each(scripts, function(id, s){
-        if (s.jsfile) {
+function replaceResources(files){
+    $.each(files, function(id, s){
+        if (s.file) {
             document.write(s.code);
         } else {
-            addjs(s.code, true, id);
+            if (s.type === 'js') {
+                console.log('Script : ' + id);
+                addjs(s.code, true, id);
+            } else {
+                console.log('Style : ' + id);
+                addcss(s.code, true, id);
+            }
         }
     });
 }
@@ -94,11 +124,11 @@ function apply(options, tabId, cb){
 function savepage(options, cb){
     //saveimages(options, cb);
     savecss(options, function(a){
-		savejs(options, function(b){
-			$.extend(a,b);
-			cb(a);
-		});
-	});
+        savejs(options, function(b){
+            $.extend(a, b);
+            cb(a);
+        });
+    });
 }
 
 function saveimages(options, cb){
@@ -112,7 +142,7 @@ function savejs(options, cb){
     
     $('script').each(function(i, el){
         var url = $(el).attr('src');
-		var s = {
+        var s = {
             url: url
         };
         if (s.url) {
@@ -127,7 +157,7 @@ function savejs(options, cb){
                 --modulos;
                 console.log('url:' + s.url);
                 scripts.push(s);
-                if (ended && modulos == 0) {
+                if (ended && modulos === 0) {
                     cb({
                         location: window.location.href,
                         scripts: scripts
@@ -145,9 +175,16 @@ function savejs(options, cb){
 function savecss(options, cb){
     var styles = [], modulos = 0, ended = false;
     
+	$('style').each(function(i, el){
+        var s = {
+			code: $(el).text()
+		};
+        styles.push(s);
+    });
+	
     $('link[rel="stylesheet"]').each(function(i, el){
-		var url = $(el).attr('href');
-		var s = {
+        var url = $(el).attr('href');
+        var s = {
             url: url
         };
         if (s.url) {
@@ -155,25 +192,25 @@ function savecss(options, cb){
         } else {
             s.code = $(el).text();
         }
-		
+        
         if (s.url) {
-			++modulos;
-			$.get(s.url, function(data){
-				--modulos;
-				console.log('url:' + url);
-				styles.push(s);
-				var urlimports = checkImport(url, data);
-				if (urlimports && urlimports.length > 0) {
-					styles.push(urlimports);
-				}
-				if (ended && modulos == 0) {
-					cb({
-						location: window.location.href,
-						styles: styles
-					});
-				}
-			});
-		}else {
+            ++modulos;
+            $.get(s.url, function(data){
+                --modulos;
+                console.log('url:' + url);
+                styles.push(s);
+                var urlimports = checkImport(url, data);
+                if (urlimports && urlimports.length > 0) {
+                    styles.push(urlimports);
+                }
+                if (ended && modulos === 0) {
+                    cb({
+                        location: window.location.href,
+                        styles: styles
+                    });
+                }
+            });
+        } else {
             styles.push(s);
         }
     });

@@ -17,6 +17,14 @@ function req(message, cb, data){
 	}
 }
 
+function _get(name, cb){
+	req('get', cb, { name: name});
+}
+function _set(name, value, cb){
+	req('set', cb, { name: name, value:value});
+}
+
+
 function requesttext(url, cb){
 	req('xhr', function(xhr){
 		if (xhr.status == 200) {
@@ -40,11 +48,13 @@ function inject(msg, cb, options){
 	chrome.tabs.getSelected(null, function(tab){
         //if (!isUrl(tab.url)) 
         //    return;
-        chrome.tabs.connect(tab.id).postMessage({
+        var port = chrome.tabs.connect(tab.id);
+		port.postMessage({
             message: msg,
 			tab:tab.tabId,
             options: options
         });
+		port.onMessage.addListener(cb);
     });
 }
 
