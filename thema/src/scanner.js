@@ -3,9 +3,9 @@ req('profiles', function(profiles){
     $.each(profiles, function(id, p){
         if (p && p.url) {
             $.each(p.url, function(i, u){
-                var re = new RegExp(encodeRE(u));
+				var re = new RegExp(encodeRE(u));
                 if (re.test(url)) {
-                    console.log('Apply profile ' + id + ' / ' + u);
+                    //console.log('Apply profile ' + id + ' / ' + u);
                     apply(p);
                 }
             });
