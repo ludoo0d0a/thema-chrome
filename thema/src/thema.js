@@ -2,14 +2,15 @@
 //Check @include in userscripts
 //store in cache, edit capabilities
 //add script userscript
+
 var aliases = {
     greasekit:{
 		id: 'greasekit',
-		js: 'http://thema-chrome.googlecode.com/svn/thema/libs/greasekit.js'
+		js: getLocalScript('res/greasekit.js')
 	},
 	xwindow:{
 		id: 'xwindow',
-		js: chrome.extension.getURL('res/xwindow.js')+'?'+Math.round(Math.random()*9999+1)
+		js: getLocalScript('res/xwindow.js')
 	},
 	userscript:{
 		id: 'userscript$version',
@@ -185,7 +186,7 @@ function addStyle(styles, lid, astext, cb){
 }
 
 function addScript(scripts, lid, astext, cb){
-    console.log('addScript '+scripts);
+    //console.log('addScript '+scripts);
 	if (modebg) {
 		var o= (astext) ? {code: scripts} : {file: scripts};
 		o.tab=mytabId;
@@ -210,4 +211,8 @@ function addScript(scripts, lid, astext, cb){
 		el.appendTo($('head'));
 	}
     
+}
+
+function getLocalScript(path){
+	return chrome.extension.getURL(path)+'?'+Math.round(Math.random()*9999+1);
 }
