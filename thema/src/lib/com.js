@@ -36,7 +36,8 @@ function inject(message, cb, data){
 }
 */
 function inject(msg, cb, options){
-    chrome.tabs.getSelected(null, function(tab){
+    //cb not used !!!
+	chrome.tabs.getSelected(null, function(tab){
         //if (!isUrl(tab.url)) 
         //    return;
         chrome.tabs.connect(tab.id).postMessage({

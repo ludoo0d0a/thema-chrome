@@ -5,14 +5,32 @@
         <title></title>
         <script type="text/javascript">
             var rendered = false;
-            function printSource(a){
-                var out = $('#output');
-                out.html('');
-                $.each(a.urls, function(i, url){
-                    out.append('<p><a href="' + url + '">' + url + '</a></p>');
-                });
+            function printSource(o){
+                /*
+                 $.each(o.urls, function(i, url){
+                 out.append('<p><a href="' + url + '">' + url + '</a></p>');
+                 });*/
+				console.log('printSource');
+				console.log(o);
+                $('#output').html('<h1>' + o.location + '</h1>');
+                listItems(o, 'styles', 'CSS stylesheets', '#output');
+                listItems(o, 'scripts', 'Javascript files', '#output');
                 rendered = true;
             }
+            
+            function listItems(o, id, name, el){
+                var html = '<h2>' + name + '</h2>', ul = $('<ul></ul>').appendTo(el);
+                $.each(o[id], function(i, s){
+                    if (s.url) {
+						html += '<li><a href="' + s.url + '">' + s.url + '</a></li>';
+					}
+                    if (s.code) {
+						html += '<li><code>' + htmlEscape(s.code) + '</code></li>';
+					}
+                });
+                ul.append(html);
+            }
+            
             
             function req(message, cb, data){
                 if (chrome.extension) {
@@ -21,9 +39,13 @@
                     chrome.extension.sendRequest(o, cb);
                 }
             }
+			
+			function htmlEscape(txt){
+				return txt.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+			} 
             
             function refresh(){
-				console.log("refresh");
+                console.log("refresh");
                 //get id from uid
                 var id = window.location.hash.replace(/^#/, '');
                 req('getdata', function(o){
@@ -37,9 +59,9 @@
                 $('#refresh').bind('click', refresh);
             });
             window.setTimeout(function(){
-                if (!rendered){
-					refresh();
-				}
+                if (!rendered) {
+                    refresh();
+                }
             }, 500);
         </script>
     </head>
