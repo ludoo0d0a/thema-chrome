@@ -6,12 +6,6 @@
         <script type="text/javascript">
             var rendered = false;
             function printSource(o){
-                /*
-                 $.each(o.urls, function(i, url){
-                 out.append('<p><a href="' + url + '">' + url + '</a></p>');
-                 });*/
-				console.log('printSource');
-				console.log(o);
                 $('#output').html('<h1>' + o.location + '</h1>');
                 listItems(o, 'styles', 'CSS stylesheets', '#output');
                 listItems(o, 'scripts', 'Javascript files', '#output');
