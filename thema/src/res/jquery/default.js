@@ -8,6 +8,5 @@ tHema.onReady = function(){
    setInterval(function(){
    	jQuery('img,input,select,textarea').toggle();
    },2000);
-
 }
 

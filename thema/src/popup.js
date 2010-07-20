@@ -62,9 +62,13 @@ $(function(){
     }, {
         name: 'editor'
     });
+	
+	req('get', function(a){
+		$('#autoinstall').val(a.value);
+	}, {
+        name: 'autoinstall'
+    });
     
-   
-	$('#btn-scan').click(scanPage);
     $('#btn-apply').click(applyprofile);
     $('#btn-save').click(saveprofile);
     $('#btn-new').click(newprofile);
@@ -73,14 +77,22 @@ $(function(){
     //$('#btn-load').click(loadCombo);
     //$('#btn-html').click(testhtml);
     //$('#btn-toast').click(toastdemo);
-    $('#btn-unpack').click(unpack);
+    $('#btn-scan').click(scanPage);
+	$('#btn-unpack').click(unpackPage);
+	
     $('#teditor').bind('change', function(){
         req('set', null, {
             name: 'editor',
             value: $('#teditor').val()
         });
-    })
-    
+    });
+	
+	$('#autoinstall').bind('change', function(){
+        req('set', null, {
+            name: 'autoinstall',
+            value: $('#autoinstall').val()
+        });
+    });
 });
 
 
@@ -244,6 +256,11 @@ function getData(){
         o.js = editors.js.val() || '';
         o.css = editors.css.val() || '';
     }
+	
+	var d= $('#disabled').val();
+	if (d){
+		o.disabled=true;
+	}
     
     return o;
 }
@@ -261,6 +278,9 @@ function setDataProfile(data){
         url = data.url.join('\n');
     }
     $('#tx_url').val(url);
+	
+	
+	$('#disabled').val(data.disabled);
     
     var s = data.tab || getCurrentTab();
     if (data.js && !data.css && s == 'css') {
@@ -355,16 +375,16 @@ function savemyprofile(id, data){
 
 function applyprofile(){
     inject('apply', function(){
-        $().message("Injection done!");
+        $().message("Profile is now applied on the current page!");
     }, {
         id: $('#selprofile').val(),
         data: getData()
     });
 }
 
-function unpack(){
+function unpackPage(){
     inject('unpackpage', function(){
-        $().message("Unpack done!");
+        $().message("Page is now unpacked!");
     });
 }
 

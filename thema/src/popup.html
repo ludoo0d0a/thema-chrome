@@ -45,6 +45,9 @@
                 <li id="tab_settings">
                     <a href="#">Settings</a>
                 </li>
+				 <li id="tab_general">
+                    <a href="#">General</a>
+                </li>
             </ul>
             <div class="panes skin2">
                 <div class="ctn-editor">
@@ -52,10 +55,30 @@
                 <div class="ctn-editor">
                 </div>
                 <div>
-                    <div id="panel-settings">
-                        <p><label id="lbl_name" for="tx_name">Name</label><input title="name" size="40" type="text" id="tx_name"/></p><p><label id="lbl_url" for="tx_url">Url filter</label>
+                    <div class="panel-ctn" id="panel-settings">
+                        <p>
+							<label for="disabled">Disabled : </label>
+							<input type="checkbox" name="disabled" value="1"/>
+						</p>
+						<p><label id="lbl_name" for="tx_name">Name</label><input title="name" size="40" type="text" id="tx_name"/></p><p><label id="lbl_url" for="tx_url">Url filter</label>
                             <br/>
                             <textarea title="Url filter" rows="5" cols="40" id="tx_url"></textarea>
+                        </p>
+						
+					</div>
+				</div>
+				 <div>
+                    <div class="panel-ctn" id="panel-general">
+                        <p>
+							<label for="autoinstall">Autointall : </label>
+							<input type="checkbox" name="autoinstall" value="1"/>
+						</p>
+                        <p>
+							<a href="http://www.userscripts.org" target="_blank">Find new scripts</a>
+                            <form method="get" action="http://userscripts.org/scripts/search" target="_blank">
+                                <input type="input" name="q" value=""/>
+								<input id="btn-search" type="submit" value="Search" class="button cursor" />
+                            </form>
                         </p>
 						<p>
 							<label for="teditor">Editor (reopen window to take effect): </label>
@@ -65,13 +88,7 @@
 								<option value="codemirror">CodeMirror</option>
 							</select>
 						</p>
-                        <p><a href="http://code.google.com/p/thema-chrome/wiki/JsHelp" target="_blank">Help on Javascript import rules</a></p>
-                        <p><a href="http://www.userscripts.org" target="_blank">Find new scripts</a>
-                            <form method="get" action="http://userscripts.org/scripts/search" target="_blank">
-                                <input type="input" name="q" value=""/>
-								<input id="btn-search" type="submit" value="Search" class="button cursor" />
-                            </form>
-                        </p>
+						<p><a href="http://code.google.com/p/thema-chrome/wiki/JsHelp" target="_blank">Help on Javascript import rules</a></p>
                     </div>
                 </div>
             </div>
