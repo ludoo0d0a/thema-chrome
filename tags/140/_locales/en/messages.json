@@ -1,0 +1,11 @@
+{
+  "extension_name": {
+    "message": "tHema"
+  },
+  "extension_description": {
+    "message": "Change the theme, design of your favorites sites by adding custom CSS et Javascript"
+  },
+  "browser_action_tooltip_default": {
+    "message": "tHema, CSS and Javacript injection"
+  } 
+}

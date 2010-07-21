@@ -1,0 +1,367 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>tHema Background</title>
+        <script type="application/javascript" src="lib/jquery-1.4.2.min.js"></script>
+        <script type="application/javascript" src="lib/toast.js"></script>
+        <script type="application/javascript" src="lib/xml2json.js"></script>
+        <script type="application/javascript" src="lib/parseuri.js"></script>
+        <script type="application/javascript" src="lib/util.js"></script>
+        <script type="application/javascript" src="lib/unpack/beautify.js"></script>
+        <script type="application/javascript" src="lib/unpack/beautify-html.js"></script>
+        <script type="application/javascript" src="lib/unpack/unpackers/javascriptobfuscator_unpacker.js"></script>
+        <script type="application/javascript" src="lib/unpack/unpackers/bookmarklet_unpacker.js"></script>
+        <script type="application/javascript" src="lib/unpack/unpackers/p_a_c_k_e_r_unpacker.js"></script>
+        <script type="application/javascript" src="unpacker.js"></script>
+        <script type="application/javascript">
+            chrome.extension.onRequest.addListener(function(a, sender, cb){
+               // console.log('get bg message ' + a.message);
+                if (a.message === 'xhr') {
+                    request(a, false, cb);
+                } else if (a.message === 'toast') {
+                    toast(a, cb);
+                } else if (a.message === 'bg-scan') {
+                    var id = getUid('scan');
+                    setvalue(id, a)
+                    openNewPage(a, id);
+                } else if (a.message === 'getdata') {
+                    var value = getvalue(a.id);
+                    callb(cb, value);
+                } else if (a.message === 'open') {
+                    callb(cb, openprofile(a));
+                } else if (a.message === 'save') {
+                    callb(cb, saveprofile(a));
+                } else if (a.message === 'bg-apply') {
+                    //send ok to popup
+                } else if (a.message === 'new') {
+                    newprofile(a, cb);
+                } else if (a.message === 'del') {
+                    callb(cb, delprofile(a));
+                } else if (a.message === 'profiles') {
+                    var profiles = getProfiles();
+                    callb(cb, profiles);
+                } else if (a.message === 'addjs') {
+                    addjs(a, cb);
+                } else if (a.message === 'addcss') {
+                    addcss(a, cb);
+                } else if (a.message === 'set') {
+                    setvalue(a.name, a.value);
+                    callb(cb);
+                } else if (a.message === 'get') {
+                    callb(cb, {
+                        name: a.name,
+                        value: getvalue(a.name)
+                    });
+                } else if (a.message === 'unpack') {
+                    unpackpage(a, cb);
+                } else if (a.message === 'userscript') {
+                    adduserscript(a, cb);
+                }
+            });
+            
+            function getvalue(name, defaut){
+                var o = localStorage.getItem(name);
+                var value = o;
+                if (o && typeof o === 'string') {
+                    try {
+                        value = JSON.parse(o);
+                    } catch (e) {
+                        //
+                    }
+                }
+                return value || defaut;
+            }
+            
+            function delvalue(name){
+                localStorage.removeItem(name);
+            }
+            
+            function setvalue(name, value){
+                var v = value;
+                if (typeof value === 'object') {
+                    v = JSON.stringify(value);
+                }
+                localStorage.setItem(name, v);
+            }
+            
+            function getProfiles(){
+                return getvalue('profiles', {});
+            }
+            
+            function openprofile(a){
+                var values = getProfiles();
+                return values[a.id] || {};
+            }
+            
+            function newprofile(a, cb, url){
+                if (!url) {
+                    return getSelectedTabUrl(function(uri){
+                        var domain = getUrlDomain(uri);
+                        newprofile(a, cb, domain);
+                    });
+                }
+                
+                var values = getProfiles();
+                var id = getPid(values);
+                
+                function getDefaultProfile(xhr){
+                    var js = '';
+                    if (xhr && xhr.responseText) {
+                        js = xhr.responseText;
+                    }
+                    var p = {
+                        id: id,
+                        data: {
+                            name: 'My profile for ' + url,
+                            url: url,
+                            js: js,
+                            css: '/* Empty CSS stylesheet */'
+                        }
+                    };
+                    saveprofile(p);
+                    callb(cb, p);
+                }
+                
+                request({
+                    url: 'res/jquery/default.js'
+                }, true, getDefaultProfile);
+                
+            }
+            
+            function delprofile(a){
+                var values = getProfiles();
+                if (values[a.id]) {
+                    delete values[a.id];
+                    setvalue('profiles', values);
+                }
+                return values;
+            }
+            
+            function getPid(values){
+                return 'p' + (getSize(values) + 1);
+            }
+            
+            function saveprofile(a){
+                var values = getProfiles();
+                if (a.data) {
+                    if (!a.id) {
+                        a.id = getPid(values);
+                    }
+                    values[a.id] = a.data;
+                    setvalue('profiles', values);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            
+            function adduserscript(a){
+                xhr({
+                    url: a.url
+                }, function(xhr){
+                    var code = '/*\n' +
+                    ' * Userscript : ' +
+                    a.name +
+                    '\n' +
+                    ' * Source :  ' +
+                    a.source +
+                    '\n' +
+                    '*/\n' +
+                    '//@require greasekit\n' +
+                    '//@could-require jquery\n' +
+                    '//@require userscript ' +
+                    a.id +
+                    '\n';
+                    var text = xhr.responseText;
+                    var urls = extractUrls(text);
+                    
+                    saveprofile({
+                        id: 'userscript' + a.id,
+                        data: {
+                            url: urls,
+                            name: a.name,
+                            js: code
+                        }
+                    });
+                });
+            }
+            
+            var reRequire = /\/\/\s*@include\s*(.*)$/mg;
+            function extractUrls(text){
+                var rq, urls = [];
+                while ((rq = reRequire.exec(text))) {
+                    var line = rq[1];
+                    if (line) {
+                        urls.push(line);
+                    }
+                }
+                return urls;
+            }
+            
+            function getUid(prefix){
+                var s = [];
+                if (prefix) {
+                    s.push(prefix);
+                }
+                for (var i = 0; i < 5; i++) 
+                    s[i] = Math.floor(Math.random() * 0x10);
+                return s.join('');
+            }
+            
+            function openNewPage(a, id){
+                chrome.tabs.getSelected(null, function(tab){
+                    var oldUrl = tab.url;
+                    var blankUrl = chrome.extension.getURL('blank.html');
+                    blankUrl += '#' + id;
+                    chrome.tabs.create({
+                        url: blankUrl,
+                        index: tab.index + 1
+                    }, function(tab){
+                        var tabs = chrome.extension.getExtensionTabs();
+                        for (var i = 0; i < tabs.length; i++) {
+                            var tab = tabs[i];
+                            if (tab.location.href == blankUrl && !tab.dataAlreadySet) {
+                                tab.printSource(a);
+                                tab.dataAlreadySet = true;
+                                break;
+                            }
+                        }
+                    });
+                });
+            }
+            
+            function getSelectedTabUrl(cb){
+                chrome.tabs.getSelected(null, function(tab){
+                    cb(tab.url);
+                });
+            }
+            
+            function addjs(o, cb){
+                console.log('addjs:');
+                console.log(o);
+                if (o.code || o.file) {
+                    var a = {
+                        code: o.code,
+                        file: o.file
+                    };
+                    chrome.tabs.getSelected(null, function(tab){
+                        chrome.tabs.executeScript(o.tab || tab.id, a, cb);
+                    });
+                }
+            }
+            
+            function addcss(o, cb){
+                console.log('addcss:');
+                console.log(o);
+                if (o.code || o.file) {
+                    var a = {
+                        code: o.code,
+                        file: o.file
+                    };
+                    chrome.tabs.getSelected(null, function(tab){
+                        chrome.tabs.insertCSS(o.tab || tab.id, a, cb);
+                    });
+                }
+            }
+            
+            function xhr(a, cb){
+                request(a, true, cb);
+            }
+            
+            function request(a, local, cb){
+                var xhr = new XMLHttpRequest();
+                var method = a.method || 'get';
+                var url = a.url;
+                if (a.parameters && (method.toLowerCase() == 'get')) {
+                    var params = [];
+                    for (var k in a.parameters) {
+                        params.push(k + '=' + encodeURIComponent(a.parameters[k]));
+                    }
+                    var sep = (url.indexOf('?') > 0) ? '&' : '?';
+                    url += sep + params.join('&');
+                }
+                xhr.open(a.method || 'get', url, true);
+                if (a.login) {
+                    xhr.withCredentials = "true";
+                }
+                //headers
+                if (a.headers) {
+                    for (var kh in a.headers) {
+                        xhr.setRequestHeader(kh, a.headers[kh]);
+                    }
+                }
+                if (cb) {
+                    //Chrome extesnion looks on readystatechange
+                    a.onreadystatechange = true;
+                }
+                xhr.onreadystatechange = function(o){
+                    if (xhr.readyState == 4) {
+                        var responseJson = false;
+                        var res = {
+                            responseText: xhr.responseText,
+                            responseHeaders: xhr.responseHeaders,
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            request: a
+                        }
+                        if (a.xpath && xhr.responseXML) {
+                            if (typeof a.xpath === 'string') {
+                                a.xpath = {
+                                    0: a.xpath
+                                };
+                            }
+                            res.xml = {};
+                            res.json = {};
+                            $.each(a.xpath, function(i, xpath){
+                                var els = getElements(xpath, xhr.responseXML);
+                                if (els) {
+                                    if (a.dataType === 'xml') {
+                                        res.xml[i] = serializeXml(els);
+                                    } else if (a.dataType === 'json') {
+                                        res.json[i] = {};
+                                        $.each(els, function(j, el){
+                                            res.json[i][j] = xml2json(el);
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        
+                        if (a.dataType === 'json') {
+                            if (xhr.responseText) {
+                                res.responseJson = JSON.parse(xhr.responseText);
+                            } else if (xhr.responseXML) {
+                                res.responseJson = xml2json(xhr.responseXML, '');
+                            }
+                        }
+                        cb(res);
+                    }
+                };
+                try {
+                    xhr.send(a.data || {});
+                } catch (e) {
+                    var o = {
+                        responseText: e.message || 'Error',
+                        status: (e.name || '') + ' ' + (e.code || 0),
+                        statusText: (e.name || '') + ' ' + (e.code || 0),
+                        error: e
+                    };
+                    if (local && typeof a.onerror === "function") {
+                        a.onerror.call(this, o);
+                    } else {
+                        cb(o);
+                    }
+                }
+            }
+            
+            function callb(cb, data){
+                if (cb && typeof cb === 'function') {
+                    cb(data || null);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <!--canvas id="canvas" width="19" height="19"></canvas-->
+    </body>
+</html>

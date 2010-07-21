@@ -1,0 +1,80 @@
+/* from http://flowplayer.org/tools/css/tabs-no-images.css */
+/* root element for tabs  */
+ul.tabs {
+    margin: 0 !important;
+    padding: 0;
+    height: 30px;
+    border-bottom: 1px solid #666;
+}
+
+/* single tab */
+ul.tabs li {
+    float: left;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+/* link inside the tab. uses a background image */
+ul.tabs a {
+    float: left;
+    font-size: 13px;
+    display: block;
+    padding: 5px 30px;
+    text-decoration: none;
+	text-shadow: rgba(0,0,0,.4) 0 1px 0;
+    border: 1px solid #666;
+    border-bottom: 0px;
+    height: 18px;
+    background-color: #364451;
+    color: #eee;
+    margin-right: 2px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    position: relative;
+    top: 1px;
+}
+
+ul.tabs a:hover {
+    background-color: #F7F7F7;
+    color: #333;
+}
+
+/* selected tab */
+ul.tabs a.current {
+    background-color: #ddd;
+    border-bottom: 2px solid #ddd;
+    color: #bbb;
+    cursor: default;
+}
+
+/* tab pane */
+.panes > div {
+    /*display: none;*/
+    border: 1px solid #666;
+    border-width: 0 1px 1px 1px;
+    min-height: 350px;
+    color: #fff;
+	background-color: #364451;
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#4E5E6D), to(#182837));
+}
+
+/* alternate colors: skin2 */
+ul.skin2 > a {
+    background-color: #89a;
+    color: #fff !important;
+	-webkit-border-top-left-radius: 5px;
+   -webkit-border-top-right-radius: 5px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+}
+
+/* mouseover state */
+ul.skin2 a:hover {
+    background-color: #678;
+}
+
+/* active tab */
+ul.skin2 a.current {
+    background-color: #4F5C6A;
+    border-bottom: 2px solid #4F5C6A;
+}

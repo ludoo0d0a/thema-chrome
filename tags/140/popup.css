@@ -1,0 +1,6 @@
+/* Load the base styles */
+@import url(css/layout.css);
+@import url(css/buttons.css);
+@import url(css/base.css);
+@import url(css/tabs.css);
+@import url(css/editor.css);
