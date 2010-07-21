@@ -1,0 +1,117 @@
+.button {
+    border-top: 1px solid #96d1f8;
+    background: #65a9d7;
+    background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+   padding: 7px 14px;
+   -webkit-border-radius: 6px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 11px;
+   font-family: Helvetica, Arial, Sans-Serif;
+   text-decoration: none;
+   vertical-align: middle;
+ }
+.button:hover {
+   border-top-color: #28597a;
+   background: #28597a;
+   color: #ccc;
+   }
+.button:active, .button.active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+   }
+
+
+.btn-small {
+   border-top: 1px solid #96d1f8;
+   background: #65a9d7;
+   background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+   padding: 4px 8px;
+   -webkit-border-radius: 5px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 9px;
+   font-family: Helvetica, Arial, Sans-Serif;
+   text-decoration: none;
+   vertical-align: middle;
+   }
+.btn-small:hover {
+   border-top-color: #28597a;
+   background: #28597a;
+   color: #ccc;
+   }
+.btn-small:active, .btn-small.active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+}
+   
+   
+.btn-tab {
+   border-top: 1px solid #96d1f8;
+   background: #65a9d7;
+   background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+   padding: 4px 8px;
+   -webkit-border-top-left-radius: 5px;
+   -webkit-border-top-right-radius: 5px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 9px;
+   font-family: Helvetica, Arial, Sans-Serif;
+   text-decoration: none;
+   vertical-align: middle;
+   width:20px;
+   height:10px;
+   float:right;
+}
+.btn-tab:hover {
+   border-top-color: #28597a;
+   background: #28597a;
+   color: #ccc;
+}
+.btn-tab:active, .btn-tab.active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+}
+/*
+ * Specific sizes
+ */   
+.btn-small{
+	width:20px;
+	margin-left:5px;
+}
+.fr{
+	float:right;
+}
+.fl{
+	float:left;
+}
+.button{
+	margin-right:5px;
+	width:30px;
+}
+#btn-unpack{
+	width:30px;
+	float:left;
+}
+#btn-scan{
+	width:25px;
+	float:left;
+}
+#btn-save{
+	width:30px;
+	float:right;
+}
+#btn-apply{
+	width:75px;
+	float:right;
+}
+#btn-auto{
+	width:30px;
+	float:right;
+}
+#btn-search{
+	width:80px;
+}
