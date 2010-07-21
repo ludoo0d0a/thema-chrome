@@ -1,0 +1,61 @@
+#main {
+    width:400px;
+    height:450px;
+	margin:5px;
+}
+.full #main{
+	width:1000px;
+    height:600px;
+}
+.full #btn-html, .full #btn-toast, .full #btn-css {
+	display:none;
+}
+
+ol{
+	margin:0px;
+	-webkit-padding-start:0px;
+}
+
+.hidden{
+	display:none;
+}
+
+#footer{
+	margin-top:5px;
+}
+/**
+ * Layout position
+ */
+#ctn-profile{
+	float:left;
+	width:220px;
+	height: 20px;
+}
+#ctn-filter{
+	float:left;
+	width:320px;
+}
+#profile{
+	width:100%;
+	height:30px;
+}
+
+.newprofile{
+	width:30px;
+	float:left;
+}
+
+#changed{
+	color:#fff;
+	display:inline;
+}
+
+/**
+ * Settings panel
+ */
+.panel-ctn {
+	padding: 15px;
+}
+.panel-ctn p{
+	margin-top: 10px;
+}
