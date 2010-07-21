@@ -61,7 +61,7 @@ var aliases = {
     }]
 };
 
-var reRequire = /\/\/\s*@require\s*(.*)$/mg;
+var reRequire = /\/\/\s*@(\w+)\s*(.*)$/mg;
 var reRequireLine = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
 var scripts = 300;
 //@require jquery 1.4.2 jq $
@@ -69,25 +69,31 @@ var scripts = 300;
 function autoUpdate(coda, asjs){
     var i = 0, rq, alias, code = coda;
     while ((rq = reRequire.exec(code))) {
-        var line = rq[1];
-        var m = reRequireLine.exec(line);
-        var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
-        console.log('require ' + url);
-        console.log(m);
-        if (url) {
-            if (asjs) {
-                //could be an alias
-                var alias = aliases[url];
-                if (alias) {
-                    addLibraries(alias, version, shortcut);
-                } else {
-                    addScript(url, id);
-                }
-            } else {
-                addStyle(url, id);
-            }
-        }
+        var key = rq[1];
+		if (key === 'require') {
+			var line = rq[2];
+			var m = reRequireLine.exec(line);
+			var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
+			console.log('require ' + url);
+			console.log(m);
+			if (url) {
+				if (asjs) {
+					//could be an alias
+					var alias = aliases[url];
+					if (alias) {
+						addLibraries(alias, version, shortcut);
+					} else {
+						addScript(url, id);
+					}
+				} else {
+					addStyle(url, id);
+				}
+			}
+		}else if (key === 'include') {
+			//TODO....
+		}
     }
+	
     if (asjs) {
         code = 'window.tHema=window.tHema||{};\n' + code;
     }
@@ -132,15 +138,21 @@ function addLibraries(alias, version, shortcut){
     var url, code;
     if (alias.css) {
         url = fv(alias.css, o);
-        addStyle(url, id, false, false, alias.cached);
+		if (url) {
+			addStyle(url, id, false, false, alias.cached);
+		}
     }
     if (alias.js) {
         url = fv(alias.js, o);
-        addScript(url, id, false, false, alias.cached);
+		if (url) {
+			addScript(url, id, false, false, alias.cached);
+		}
     }
     if (alias.jsx) {
         code = fv(alias.jsx, o);
-        addScript(code, id + 'x', true, false, alias.cached);
+		if (code) {
+			addScript(code, id + 'x', true, false, alias.cached, alias.defer);
+		}
     }
 }
 
@@ -209,7 +221,7 @@ function addStyle(styles, lid, astext, cb, cached){
     }
 }
 
-function addScript(scripts, lid, astext, cb, cached){
+function addScript(scripts, lid, astext, cb, cached, defer){
     //console.log('addScript '+scripts);
     if (modebg) {
         var o = (astext) ? {
@@ -236,10 +248,13 @@ function addScript(scripts, lid, astext, cb, cached){
         } else {
             var pid = 'js_' + (lid||styles);
 			if (cached) {
+				el.attr('defer', 'defer');//useful?
 				_get(pid, function(o){
 					if (o.value) {
 						//cached
-						el.text(o.value);
+						setTimeout(function(){
+							el.text(o.value);
+						}, defer||300);
 					} else {
 						el.attr('src', scripts);
 						requesttext(scripts, function(code){
@@ -251,8 +266,10 @@ function addScript(scripts, lid, astext, cb, cached){
 					el.appendTo($('head'));
 				});
 			}else{
-				el.attr('src', scripts);
-				el.appendTo($('head'));
+				setTimeout(function(){
+					el.attr('src', scripts);
+					el.appendTo($('head'));
+				}, defer||200);
 			}
         }
     }
