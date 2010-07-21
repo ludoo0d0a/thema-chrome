@@ -44,17 +44,18 @@ function inject(message, cb, data){
 }
 */
 function inject(msg, cb, options){
-    //cb not used !!!
 	chrome.tabs.getSelected(null, function(tab){
-        //if (!isUrl(tab.url)) 
-        //    return;
         var port = chrome.tabs.connect(tab.id);
 		port.postMessage({
             message: msg,
 			tab:tab.tabId,
             options: options
         });
-		port.onMessage.addListener(cb);
+		port.onMessage.addListener(function(a){
+			console.log('port.onMessage.addListener');
+			console.log(a);
+			cb(a);
+		});
     });
 }
 

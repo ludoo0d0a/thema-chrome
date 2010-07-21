@@ -74,7 +74,7 @@ chrome.extension.onConnect.addListener(function(port){
         } else if (a.message === 'apply') {
             apply(a.options.data, a.tab, function(res){
                 req('bg-apply');
-				sendMessage("Current profile applied to current page!");
+				//sendMessage("Current profile applied to current page!");
             });
         }else if (a.message === 'unpackpage') {
             var scripts = getAllScripts();
@@ -82,7 +82,7 @@ chrome.extension.onConnect.addListener(function(port){
             req('unpack', function(a){
                 replaceResources(a);
 				//callback to popup to show message?
-				sendMessage("Page is now unpacked!");
+				//sendMessage("Page is now unpacked!");
             }, {
                 scripts: scripts,
                 styles: styles
