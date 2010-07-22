@@ -177,3 +177,10 @@ function absoluteUrl(url, urlpage){
 	
     return u;
 }
+
+//http://snipplr.com/view/9649/escape-regular-expression-characters-in-string/
+//http://simonwillison.net/2006/Jan/20/escape/
+var re_encodeRE = new RegExp("[.+?|()\\[\\]{}\\\\]", "g"); // .+?|()[]{}\
+function encodeRE(s){
+    return s.replace(re_encodeRE, "\\$&").replace(/\s/g, '\\s').replace(/\*/g, '.*');
+}
