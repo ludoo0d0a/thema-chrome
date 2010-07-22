@@ -373,7 +373,7 @@ function savemyprofile(id, data){
         };
         //save
         req('save', function(){
-            $().message("Profile " + name + " saved!");
+            $().message("Profile " + o.data.name + " saved!");
             $('#changed').hide();
             loadCombo(id);
         }, o);
