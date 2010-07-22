@@ -1,17 +1,19 @@
-req('profiles', function(profiles){
-    var url = window.location.href;
-    $.each(profiles, function(id, p){
-        if (p && p.url) {
-            $.each(p.url, function(i, u){
-                var re = new RegExp(encodeRE(u));
-                if (re.test(url)) {
-                    //console.log('Apply profile ' + id + ' / ' + u);
-                    apply(p);
-                }
-            });
-        }
+function checkProfiles(){
+    req('profiles', function(profiles){
+        var url = window.location.href;
+        $.each(profiles, function(id, p){
+            if (p && p.url && !p.disabled) {
+                $.each(p.url, function(i, u){
+                    var re = new RegExp(encodeRE(u));
+                    if (re.test(url)) {
+                        //console.log('Apply profile ' + id + ' / ' + u);
+                        applyProfile(p);
+                    }
+                });
+            }
+        });
     });
-});
+}
 
 function autoIntall(){
     var source = window.location.href;
@@ -38,30 +40,38 @@ function autoIntall(){
         }));
     }
 }
-
-req('get', function(a){
-    if (a.value) {
-        autoIntall();
-    }
-}, {
-    name: 'autoinstall'
-});
+function loadSettings(){
+	req('get', function(a){
+        if (a.value) {
+            autoIntall();
+        }
+    }, {
+        name: 'autoinstall'
+    });
+}
+loadSettings();
+checkProfiles();
 
 /*
-var port = chrome.extension.connect({name: "popup_tHema"});
-
-chrome.extension.onRequest.addListener(
-  function(request, sender, sendResponse) {
-    sendResponse({counter: request.counter+1});
-  });
-*/
+ var port = chrome.extension.connect({name: "popup_tHema"});
+ chrome.extension.onRequest.addListener(
+ function(request, sender, sendResponse) {
+ sendResponse({counter: request.counter+1});
+ });
+ */
 function sendMessage(msg){
-	/*if (port) {
-		port.postMessage({
-			message: 'info',
-			text: msg
-		});
-	}*/
+    /*if (port) {
+    
+     port.postMessage({
+    
+     message: 'info',
+    
+     text: msg
+    
+     });
+    
+     }*/
+    
 }
 
 chrome.extension.onConnect.addListener(function(port){
@@ -72,17 +82,17 @@ chrome.extension.onConnect.addListener(function(port){
                 req('bg-scan', false, res);
             });
         } else if (a.message === 'apply') {
-            apply(a.options.data, a.tab, function(res){
+            applyProfile(a.options.data, a.tab, function(res){
                 req('bg-apply');
-				//sendMessage("Current profile applied to current page!");
+                //sendMessage("Current profile applied to current page!");
             });
-        }else if (a.message === 'unpackpage') {
+        } else if (a.message === 'unpackpage') {
             var scripts = getAllScripts();
             var styles = getAllStyles();
             req('unpack', function(a){
                 replaceResources(a);
-				//callback to popup to show message?
-				//sendMessage("Page is now unpacked!");
+                //callback to popup to show message?
+                //sendMessage("Page is now unpacked!");
             }, {
                 scripts: scripts,
                 styles: styles
@@ -110,13 +120,11 @@ function replaceResources(files){
 
 
 var mytabId;
-function apply(options, tabId, cb){
+function applyProfile(options, tabId, cb){
     mytabId = tabId;
-    console.log('scanner.apply css');
     var css = autoUpdate(options.css, false);
     addStyle(css, 'thcss' || options.id, true);
-    
-    console.log('scanner.apply js');
+
     var js = autoUpdate(options.js, true);
     addScript(js, 'thjs' || options.id, true);
 }
@@ -175,13 +183,13 @@ function savejs(options, cb){
 function savecss(options, cb){
     var styles = [], modulos = 0, ended = false;
     
-	$('style').each(function(i, el){
+    $('style').each(function(i, el){
         var s = {
-			code: $(el).text()
-		};
+            code: $(el).text()
+        };
         styles.push(s);
     });
-	
+    
     $('link[rel="stylesheet"]').each(function(i, el){
         var url = $(el).attr('href');
         var s = {

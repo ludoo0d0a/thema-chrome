@@ -15,7 +15,7 @@ var aliases = {
     userscript: {
         id: 'userscript$version',
         js: 'http://userscripts.org/scripts/source/$version.user.js',
-		cached:true
+        cached: true
     },
     jquery: [{
         id: 'jq',
@@ -70,30 +70,30 @@ function autoUpdate(coda, asjs){
     var i = 0, rq, alias, code = coda;
     while ((rq = reRequire.exec(code))) {
         var key = rq[1];
-		if (key === 'require') {
-			var line = rq[2];
-			var m = reRequireLine.exec(line);
-			var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
-			console.log('require ' + url);
-			console.log(m);
-			if (url) {
-				if (asjs) {
-					//could be an alias
-					var alias = aliases[url];
-					if (alias) {
-						addLibraries(alias, version, shortcut);
-					} else {
-						addScript(url, id);
-					}
-				} else {
-					addStyle(url, id);
-				}
-			}
-		}else if (key === 'include') {
-			//TODO....
-		}
+        if (key === 'require') {
+            var line = rq[2];
+            var m = reRequireLine.exec(line);
+            var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
+            console.log('require ' + url);
+            console.log(m);
+            if (url) {
+                if (asjs) {
+                    //could be an alias
+                    var alias = aliases[url];
+                    if (alias) {
+                        addLibraries(alias, version, shortcut);
+                    } else {
+                        addScript(url, id);
+                    }
+                } else {
+                    addStyle(url, id);
+                }
+            }
+        } else if (key === 'include') {
+            //TODO....
+        }
     }
-	
+    
     if (asjs) {
         code = 'window.tHema=window.tHema||{};\n' + code;
     }
@@ -132,27 +132,21 @@ function addLibraries(alias, version, shortcut){
         version: version || alias.last || '1',
         shortcut: shortcut || '$'
     };
-   
+    
     var id = fv(alias.id, o);
     
     var url, code;
     if (alias.css) {
         url = fv(alias.css, o);
-		if (url) {
-			addStyle(url, id, false, false, alias.cached);
-		}
+        addStyle(url, id, false, false, alias.cached);
     }
     if (alias.js) {
         url = fv(alias.js, o);
-		if (url) {
-			addScript(url, id, false, false, alias.cached);
-		}
+        addScript(url, id, false, false, alias.cached);
     }
     if (alias.jsx) {
         code = fv(alias.jsx, o);
-		if (code) {
-			addScript(code, id + 'x', true, false, alias.cached, alias.defer);
-		}
+        addScript(code, id + 'x', true, false, alias.cached, alias.defer);
     }
 }
 
@@ -168,6 +162,9 @@ function setval(el, text, astext){
 var modebg = false;
 var PREFIX = '__tHema_';
 function addStyle(styles, lid, astext, cb, cached){
+    if (!styles) {
+        return;
+    }
     if (modebg) {
         var o = (astext) ? {
             code: styles
@@ -177,7 +174,7 @@ function addStyle(styles, lid, astext, cb, cached){
         o.tab = mytabId;
         req('addcss', cb, o);
     } else {
-		var id = PREFIX + lid;
+        var id = PREFIX + lid;
         var el = $('#' + id);
         if (el && el.length > 0) {
             setval(el, styles, astext);
@@ -195,26 +192,26 @@ function addStyle(styles, lid, astext, cb, cached){
                 el.text(styles);
                 el.appendTo($('head'));
             } else {
-                var pid = 'css_' + (lid||styles);
-				if (cached) {
-					_get(pid, function(o){
-						if (o.value) {
-							//cached
-							el.text(o.value);
-						} else {
-							el.attr('href', styles);
-							requesttext(styles, function(code){
-								if (code) {
-									_set(pid, code);
-								}
-							});
-						}
-						el.appendTo($('head'));
-					});
-				}else{
-					el.attr('href', styles);
-					el.appendTo($('head'));
-				}
+                var pid = 'css_' + (lid || styles);
+                if (cached) {
+                    _get(pid, function(o){
+                        if (o.value) {
+                            //cached
+                            el.text(o.value);
+                        } else {
+                            el.attr('href', styles);
+                            requesttext(styles, function(code){
+                                if (code) {
+                                    _set(pid, code);
+                                }
+                            });
+                        }
+                        el.appendTo($('head'));
+                    });
+                } else {
+                    el.attr('href', styles);
+                    el.appendTo($('head'));
+                }
             }
             
         }
@@ -222,6 +219,9 @@ function addStyle(styles, lid, astext, cb, cached){
 }
 
 function addScript(scripts, lid, astext, cb, cached, defer){
+    if (!scripts) {
+        return;
+    }
     //console.log('addScript '+scripts);
     if (modebg) {
         var o = (astext) ? {
@@ -246,31 +246,31 @@ function addScript(scripts, lid, astext, cb, cached, defer){
             el.text(scripts);
             el.appendTo($('head'));
         } else {
-            var pid = 'js_' + (lid||styles);
-			if (cached) {
-				el.attr('defer', 'defer');//useful?
-				_get(pid, function(o){
-					if (o.value) {
-						//cached
-						setTimeout(function(){
-							el.text(o.value);
-						}, defer||300);
-					} else {
-						el.attr('src', scripts);
-						requesttext(scripts, function(code){
-							if (code) {
-								_set(pid, code);
-							}
-						});
-					}
-					el.appendTo($('head'));
-				});
-			}else{
-				setTimeout(function(){
-					el.attr('src', scripts);
-					el.appendTo($('head'));
-				}, defer||200);
-			}
+            var pid = 'js_' + (lid || scripts);
+            if (cached) {
+                el.attr('defer', 'defer');//useful?
+                _get(pid, function(o){
+                    if (o.value) {
+                        //cached
+                        setTimeout(function(){
+                            el.text(o.value);
+                        }, defer || 300);
+                    } else {
+                        el.attr('src', scripts);
+                        requesttext(scripts, function(code){
+                            if (code) {
+                                _set(pid, code);
+                            }
+                        });
+                    }
+                    el.appendTo($('head'));
+                });
+            } else {
+                setTimeout(function(){
+                    el.attr('src', scripts);
+                    el.appendTo($('head'));
+                }, defer || 200);
+            }
         }
     }
 }
