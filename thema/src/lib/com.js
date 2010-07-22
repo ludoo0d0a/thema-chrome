@@ -9,8 +9,8 @@ function req(message, cb, data){
 		}
 		var o = data || {};
         o.message = message;
-        console.log('send req '+message);
-		console.log(o);
+        //console.log('send req '+message);
+		//console.log(o);
 		chrome.extension.sendRequest(o, cb||emptyFn);
     }else{
 		cb(false);
@@ -80,9 +80,3 @@ function isUrl(url){
     return (new String(url)).match(/^https?:\/\//i) ? true : false;
 }
 
-//http://snipplr.com/view/9649/escape-regular-expression-characters-in-string/
-//http://simonwillison.net/2006/Jan/20/escape/
-var re_encodeRE = new RegExp("[.+?|()\\[\\]{}\\\\]", "g"); // .+?|()[]{}\
-function encodeRE(s){
-    return s.replace(re_encodeRE, "\\$&").replace(/\s/g, '\\s').replace(/\*/g, '.*');
-}
