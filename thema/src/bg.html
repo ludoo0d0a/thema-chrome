@@ -56,6 +56,8 @@
                     unpackpage(a, cb);
                 } else if (a.message === 'userscript') {
                     adduserscript(a, cb);
+                }else if (a.message === 'clearcache') {
+                    clearcache(a, cb);
                 }
             });
             
@@ -185,6 +187,16 @@
                     });
                 });
             }
+			
+			function clearcache(a,cb){
+				$.each(localStorage, function(i,o){
+					var name = localStorage.key(i);
+					if (/^js_/.test(name)){
+						delvalue(name);
+					}
+				});
+				callb(cb);
+			} 
             
             var reRequire = /\/\/\s*@include\s*(.*)$/mg;
             function extractUrls(text){

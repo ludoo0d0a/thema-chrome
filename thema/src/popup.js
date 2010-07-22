@@ -64,7 +64,9 @@ $(function(){
     });
 	
 	req('get', function(a){
-		$('#autoinstall').val(a.value);
+		if (a.value){
+			$('#autoinstall').attr('checked', 'checked');
+		}
 	}, {
         name: 'autoinstall'
     });
@@ -79,6 +81,7 @@ $(function(){
     //$('#btn-toast').click(toastdemo);
     $('#btn-scan').click(scanPage);
 	$('#btn-unpack').click(unpackPage);
+	$('#btn-clearcache').click(clearcache);
 	
     $('#teditor').bind('change', function(){
         req('set', null, {
@@ -90,10 +93,16 @@ $(function(){
 	$('#autoinstall').bind('change', function(){
         req('set', null, {
             name: 'autoinstall',
-            value: $('#autoinstall').val()
+            value: $('#autoinstall').attr('checked')
         });
     });
 });
+
+function clearcache(){
+        req('clearcache',  function(){
+			$().message('Cache cleared!');
+		});
+}
 
 
 function initeditors(configs){
@@ -257,7 +266,7 @@ function getData(){
         o.css = editors.css.val() || '';
     }
 	
-	var d= $('#disabled').val();
+	var d = $('#disabled').attr('checked');
 	if (d){
 		o.disabled=true;
 	}
@@ -278,9 +287,7 @@ function setDataProfile(data){
         url = data.url.join('\n');
     }
     $('#tx_url').val(url);
-	
-	
-	$('#disabled').val(data.disabled);
+	$('#disabled').attr('checked', data.disabled?'checked':'');
     
     var s = data.tab || getCurrentTab();
     if (data.js && !data.css && s == 'css') {
