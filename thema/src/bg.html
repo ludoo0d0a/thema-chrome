@@ -15,7 +15,7 @@
         <script type="application/javascript" src="unpacker.js"></script>
         <script type="application/javascript">
             chrome.extension.onRequest.addListener(function(a, sender, cb){
-               // console.log('get bg message ' + a.message);
+                // console.log('get bg message ' + a.message);
                 if (a.message === 'xhr') {
                     request(a, false, cb);
                 } else if (a.message === 'toast') {
@@ -45,21 +45,33 @@
                 } else if (a.message === 'addcss') {
                     addcss(a, cb);
                 } else if (a.message === 'set') {
-                    setvalue(a.name, a.value);
+                    setvalues(a);
                     callb(cb);
                 } else if (a.message === 'get') {
-                    callb(cb, {
-                        name: a.name,
-                        value: getvalue(a.name)
-                    });
+                    callb(cb, getvalues(a));
                 } else if (a.message === 'unpack') {
                     unpackpage(a, cb);
                 } else if (a.message === 'userscript') {
                     adduserscript(a, cb);
-                }else if (a.message === 'clearcache') {
+                } else if (a.message === 'clearcache') {
                     clearcache(a, cb);
                 }
             });
+            
+            function getvalues(a){
+                if (a.names) {
+                	var o ={};
+					$.each(a.names, function(i,name){
+						o[name]=getvalue(name);
+					});
+					return o;
+                } else {
+                    return {
+                        name: a.name,
+                        value: getvalue(a.name)
+                    }
+                }
+            }
             
             function getvalue(name, defaut){
                 var o = localStorage.getItem(name);
@@ -78,6 +90,16 @@
                 localStorage.removeItem(name);
             }
             
+			function setvalues(a){
+			 	if (a.name) {
+                	setvalue(a.name, a.value);
+                } else {
+					$.each(a, function(name,value){
+						setvalue(name, value);
+					});
+                }
+			}
+			
             function setvalue(name, value){
                 var v = value;
                 if (typeof value === 'object') {
@@ -187,16 +209,16 @@
                     });
                 });
             }
-			
-			function clearcache(a,cb){
-				$.each(localStorage, function(i,o){
-					var name = localStorage.key(i);
-					if (/^js_/.test(name)){
-						delvalue(name);
-					}
-				});
-				callb(cb);
-			} 
+            
+            function clearcache(a, cb){
+                $.each(localStorage, function(i, o){
+                    var name = localStorage.key(i);
+                    if (/^js_/.test(name)) {
+                        delvalue(name);
+                    }
+                });
+                callb(cb);
+            }
             
             var reRequire = /\/\/\s*@include\s*(.*)$/mg;
             function extractUrls(text){
@@ -371,6 +393,15 @@
                     cb(data || null);
                 }
             }
+			
+			function install(){
+				var a = getvalue('autoinstall');
+				if (typeof a==='undefined'){
+					setvalue('autoinstall',true);
+				}
+			}
+			
+			install();
         </script>
     </head>
     <body>

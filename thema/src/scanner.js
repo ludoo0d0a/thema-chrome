@@ -126,7 +126,7 @@ function applyProfile(options, tabId, cb){
     addStyle(css, 'thcss' || options.id, true);
 
     var js = autoUpdate(options.js, true);
-    addScript(js, 'thjs' || options.id, true);
+    addScript(js, 'thjs' || options.id, true, false, false, 300);
 }
 
 function savepage(options, cb){
