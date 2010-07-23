@@ -248,13 +248,13 @@ function addScript(scripts, lid, astext, cb, cached, defer){
         } else {
             var pid = 'js_' + (lid || scripts);
             if (cached) {
-                el.attr('defer', 'defer');//useful?
+                //el.attr('defer', 'defer');//useful?
                 _get(pid, function(o){
                     if (o.value) {
                         //cached
                         setTimeout(function(){
                             el.text(o.value);
-                        }, defer || 300);
+                        }, defer || 0);
                     } else {
                         el.attr('src', scripts);
                         requesttext(scripts, function(code){
@@ -269,7 +269,7 @@ function addScript(scripts, lid, astext, cb, cached, defer){
                 setTimeout(function(){
                     el.attr('src', scripts);
                     el.appendTo($('head'));
-                }, defer || 200);
+                }, defer || 0);
             }
         }
     }

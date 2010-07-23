@@ -23,30 +23,14 @@ var OPTIONS = {
     }
 };
 
-
-var default_profiles = {
-    'p1': {
-        name: 'Hello google',
-        url: 'google.com',
-        js: "console.log('Hello world');",
-        css: '/* No CSS */ '
-    },
-    'p2': {
-        name: 'Alert google',
-        url: 'google.com',
-        js: "alert('Hello world');",
-        css: 'body{background-color:red !important;}'
-    }
-};
-
 $(function(){
     var fullsize = (window.location.hash === '#full');
     $(document.body).toggleClass('full', fullsize);
     inittab();
     req('get', function(a){
-        console.log('get editor:' + a.value);
+        console.log('get editor:' + a.editor);
         console.log(a);
-        OPTIONS.editor = a.value || OPTIONS.editor;
+        OPTIONS.editor = a.editor || OPTIONS.editor;
         $('#teditor').val(OPTIONS.editor);
         initeditors({
             css: {
@@ -55,12 +39,12 @@ $(function(){
             js: {
                 syntax: 'js',
                 then: function(){
-                    loadCombo();
+                    loadCombo(a.currentprofile);
                 }
             }
         });
     }, {
-        name: 'editor'
+        names: ['editor','currentprofile']
     });
 	
 	req('get', function(a){
@@ -212,10 +196,7 @@ function loadCombo(selected){
     req('profiles', function(data){
         if (data) {
             profiles = data;
-        } else {
-            profiles = default_profiles;
-            selected = 'p1';
-        }
+        } 
         //profiles = data || default_profiles;
         var p = formatComboData(profiles, selected);
         //clear previous sexy combo
@@ -229,7 +210,11 @@ function loadCombo(selected){
             autoFill: true,
             changeCallback: function(){
                 //change profile
-                openprofile(this.hidden.val(), profiles);
+				openprofile(this.hidden.val(), profiles);
+				req('set',null,{
+					name:'currentprofile',
+					value:this.hidden.val()
+				});
             }
         });
         if (selected) {
