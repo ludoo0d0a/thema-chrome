@@ -27,9 +27,7 @@ function _set(name, value, cb){
 
 function requesttext(url, cb){
 	req('xhr', function(xhr){
-		if (xhr.status == 200) {
-			cb(xhr.responseText);
-		}
+		cb(xhr.responseText);
 	}, {url:url});
 }
 
