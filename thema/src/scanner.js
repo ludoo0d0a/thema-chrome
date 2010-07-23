@@ -122,11 +122,13 @@ function replaceResources(files){
 var mytabId;
 function applyProfile(options, tabId, cb){
     mytabId = tabId;
-    var css = autoUpdate(options.css, false);
-    addStyle(css, 'thcss' || options.id, true);
+    var css = autoUpdate(options.css, false, function(css){
+		addStyle(css, 'thcss' || options.id, true);
+	});
 
-    var js = autoUpdate(options.js, true);
-    addScript(js, 'thjs' || options.id, true, false, false, 300);
+    var js = autoUpdate(options.js, true, function(js){
+		addScript(js, 'thjs' || options.id, true, false, false, 300);
+	});
 }
 
 function savepage(options, cb){
