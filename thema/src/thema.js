@@ -6,7 +6,8 @@
 var aliases = {
     greasekit: {
         id: 'greasekit',
-        js: getLocalScript('res/greasekit.js')
+        js: getLocalScript('res/greasekit.js'),
+        cached: true
     },
     xwindow: {
         id: 'xwindow',
@@ -14,8 +15,7 @@ var aliases = {
     },
     userscript: {
         id: 'userscript$version',
-        js: 'http://userscripts.org/scripts/source/$version.user.js',
-        cached: true
+        js: 'http://userscripts.org/scripts/source/$version.user.js'
     },
     jquery: [{
         id: 'jq',
@@ -64,10 +64,8 @@ var aliases = {
 var reRequire = /\/\/\s*@(\w+)\s*(.*)$/mg;
 var reRequireLine = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
 var scripts = 300;
-//@require jquery 1.4.2 jq $
-//@require http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js jq
-function autoUpdate(coda, asjs){
-    var i = 0, rq, alias, code = coda;
+function autoUpdate(coda, asjs, cb){
+    var i = 0, rq, alias, code = coda, keywords = [];
     while ((rq = reRequire.exec(code))) {
         var key = rq[1];
         if (key === 'require') {
@@ -75,29 +73,48 @@ function autoUpdate(coda, asjs){
             var m = reRequireLine.exec(line);
             var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
             console.log('require ' + url);
-            console.log(m);
+            //console.log(m);
             if (url) {
-                if (asjs) {
-                    //could be an alias
-                    var alias = aliases[url];
-                    if (alias) {
-                        addLibraries(alias, version, shortcut);
-                    } else {
-                        addScript(url, id);
-                    }
-                } else {
-                    addStyle(url, id);
-                }
+                keywords.push({
+                    url: url,
+                    version: version,
+                    id: id,
+                    shortcut: shortcut,
+                    asjs: asjs
+                });
             }
         } else if (key === 'include') {
             //TODO....
         }
     }
     
+	//TODO replace loop using event event recursion
+    $.each(keywords, function(i, k){
+        if (k.asjs) {
+            //could be an alias
+            var alias = aliases[k.url];
+            if (alias) {
+                alias.keepexisting = true;
+                addLibraries(alias, k.version, k.shortcut);
+            } else {
+                addScript(k.url, k.id);
+            }
+        } else {
+            addStyle(k.url, k.id);
+        }
+    });
+    
+    
     if (asjs) {
         code = 'window.tHema=window.tHema||{};\n' + code;
     }
-    return code;
+	
+	//TODO : replace timeout by previous looping on events
+	setTimeout(function(){
+		 cb(code);
+	},300);
+   
+    //return code;
 }
 
 function fv(text, o){
@@ -138,15 +155,15 @@ function addLibraries(alias, version, shortcut){
     var url, code;
     if (alias.css) {
         url = fv(alias.css, o);
-        addStyle(url, id, false, false, alias.cached);
+        addStyle(url, id, false, false, alias);
     }
     if (alias.js) {
         url = fv(alias.js, o);
-        addScript(url, id, false, false, alias.cached);
+        addScript(url, id, false, false, alias);
     }
     if (alias.jsx) {
         code = fv(alias.jsx, o);
-        addScript(code, id + 'x', true, false, alias.cached, alias.defer);
+        addScript(code, id + 'x', true, false, alias);
     }
 }
 
@@ -161,10 +178,11 @@ function setval(el, text, astext){
 
 var modebg = false;
 var PREFIX = '__tHema_';
-function addStyle(styles, lid, astext, cb, cached){
+function addStyle(styles, lid, astext, cb, cfg){
     if (!styles) {
         return;
     }
+    cfg = cfg || {};
     if (modebg) {
         var o = (astext) ? {
             code: styles
@@ -193,7 +211,7 @@ function addStyle(styles, lid, astext, cb, cached){
                 el.appendTo($('head'));
             } else {
                 var pid = 'css_' + (lid || styles);
-                if (cached) {
+                if (cfg.cached) {
                     _get(pid, function(o){
                         if (o.value) {
                             //cached
@@ -218,11 +236,13 @@ function addStyle(styles, lid, astext, cb, cached){
     }
 }
 
-function addScript(scripts, lid, astext, cb, cached, defer){
+function addScript(scripts, lid, astext, cb, cfg){
     if (!scripts) {
         return;
     }
-    //console.log('addScript '+scripts);
+    cfg = cfg || {};
+    
+    //console.log('addScript ' + scripts);
     if (modebg) {
         var o = (astext) ? {
             code: scripts
@@ -235,7 +255,11 @@ function addScript(scripts, lid, astext, cb, cached, defer){
         var id = PREFIX + lid;
         var el = $('#' + id);
         if (el && el.length > 0) {
-            el.remove();
+            if (cfg.keepexisting) {
+                return;
+            } else {
+                el.remove();
+            }
         }
         
         el = $('<script type="text/javascript"></script>');
@@ -243,33 +267,42 @@ function addScript(scripts, lid, astext, cb, cached, defer){
             el.attr('id', id);
         }
         if (astext) {
-            el.text(scripts);
+            el.text(fixcode(scripts));
             el.appendTo($('head'));
         } else {
             var pid = 'js_' + (lid || scripts);
-            if (cached) {
+            if (cfg.cached) {
                 //el.attr('defer', 'defer');//useful?
                 _get(pid, function(o){
                     if (o.value) {
                         //cached
-                        setTimeout(function(){
+                        if (cfg.defer) {
+                            setTimeout(function(){
+                                el.text(o.value);
+                            }, cfg.defer || 0);
+                        } else {
                             el.text(o.value);
-                        }, defer || 0);
+                        }
                     } else {
                         el.attr('src', scripts);
                         requesttext(scripts, function(code){
                             if (code) {
-                                _set(pid, code);
+                                _set(pid, fixcode(code));
                             }
                         });
                     }
                     el.appendTo($('head'));
                 });
             } else {
-                setTimeout(function(){
-                    el.attr('src', scripts);
+                if (cfg.defer) {
+                    setTimeout(function(){
+                        el.attr('src', fixcode(scripts));
+                        el.appendTo($('head'));
+                    }, cfg.defer || 0);
+                } else {
+                    el.attr('src', fixcode(scripts));
                     el.appendTo($('head'));
-                }, defer || 0);
+                }
             }
         }
     }
@@ -278,4 +311,10 @@ function addScript(scripts, lid, astext, cb, cached, defer){
 
 function getLocalScript(path){
     return chrome.extension.getURL(path) + '?' + Math.round(Math.random() * 9999 + 1);
+}
+
+function fixcode(code){
+    //toSource
+    //return code/.replace(/\.toSource\(\)/g,'');
+    return code;
 }
