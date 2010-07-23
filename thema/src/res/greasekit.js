@@ -5,18 +5,18 @@
  */
 if (typeof GM_getValue === "undefined") {
     GM_getValue = function(name, def){
-        var value;
-        var nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
+        var value,nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
         for (var i = 0, c; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') 
+            c = ca[i];
+            while (c.charAt(0) == ' ') {
                 c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) == 0) {
+            }
+            if (c.indexOf(nameEQ) === 0) {
                 value = unescape(c.substring(nameEQ.length, c.length));
                 break;
             }
         }
-        if (value === null && def !== null) {
+        if (typeof value === 'undefined' && typeof def !== 'undefined') {
             value = def;
         }
         return value;
@@ -133,7 +133,7 @@ if (typeof GM_addStyle === "undefined") {
         oStyle.setAttribute("type", "text\/css");
         oStyle.appendChild(document.createTextNode(styles));
         document.getElementsByTagName("head")[0].appendChild(oStyle);
-    }
+    };
 }
 
 if (typeof GM_addScript === "undefined") {
@@ -171,7 +171,7 @@ if (typeof GM_addScript === "undefined") {
                 GM_addjs(script, false, id, cb, scope, time);
             }
         }
-    }
+    };
 }
 if (typeof GM_addScript === "undefined") {
     GM_addjs = function(script, inline, id, cb, scope, time){
@@ -191,19 +191,19 @@ if (typeof GM_addScript === "undefined") {
                 cb.call(scope || this);
             }, time || 500);
         }
-    }
+    };
 }
 
 if (typeof GM_log === "undefined") {
     GM_log = function(log){
         console.log(log);
-    }
+    };
 }
 
 if (typeof GM_registerMenuCommand === "undefined") {
     GM_registerMenuCommand = function(a, b){
         //
-    }
+    };
 }
 
 if (typeof GM_openInTab === "undefined") {
@@ -217,97 +217,39 @@ if (typeof unsafeWindow === "undefined") {
 }
 
 if (typeof Array.forEach === "undefined") {
-	Array.forEach = function(a, f){
-		Array.prototype.forEach.call(a, f);
-	};
+    Array.forEach = function(a, f){
+        Array.prototype.forEach.call(a, f);
+    };
 }
 if (typeof Array.slice === "undefined") {
-	Array.slice = function(a){
-		return Array.prototype.slice.call(a);
-	};
+    Array.slice = function(a){
+        return Array.prototype.slice.call(a);
+    };
 }
 
 if (typeof window.uneval === "undefined") {
-	window.uneval = function(a){
-		return (JSON.stringify(a))||'';
-	};
+    window.uneval = function(a){
+        return (JSON.stringify(a)) || '';
+    };
 }
-/*
-if (typeof(this['uneval']) !== 'function') {
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    var protos = [];
-    var char2esc = {
-        '\t': 't',
-        '\n': 'n',
-        '\v': 'v',
-        '\f': 'f',
-        '\r': '\r',
-        '\'': '\'',
-        '\"': '\"',
-        '\\': '\\'
-    };
-    var escapeChar = function(c){
-        if (c in char2esc) return '\\' + char2esc[c];
-        var ord = c.charCodeAt(0);
-        return ord < 0x20 ? '\\x0' + ord.toString(16) : ord < 0x7F ? '\\' + c : ord < 0x100 ? '\\x' + ord.toString(16) : ord < 0x1000 ? '\\u0' + ord.toString(16) : '\\u' + ord.toString(16);
-    };
-    var uneval_asis = function(o){
-        return o.toString();
-    };
-    // predefine objects where typeof(o) != 'object' 
-    var name2uneval = {
-        'boolean': uneval_asis,
-        'number': uneval_asis,
-        'string': function(o){
-            return '\'' +
-            o.toString().replace(/[\x00-\x1F\'\"\\\u007F-\uFFFF]/g, escapeChar) +
-            '\'';
-        },
-        'undefined': function(o){
-            return 'undefined';
-        },
-        'function': uneval_asis
-    };
-    var uneval_default = function(o, np){
-        var src = []; // a-ha!
-        for (var p in o) {
-            if (!hasOwnProperty.call(o, p)) continue;
-            src[src.length] = uneval(p) + ':' + uneval(o[p], 1);
+
+if (typeof window.eval === "undefined") {
+    window.eval = function(a){
+        var o;
+		console.log('eval for '+a);
+        try {
+            o = JSON.parse(a);
+			console.log('eval result : ');
+			console.log(o);
+        } catch (e) {
+			console.log('ERROR in eval for '+a);
+			console.error(e);
         }
-        // parens needed to make eval() happy
-        return np ? '{' + src.toString() + '}' : '({' + src.toString() + '})';
+        return o;
     };
-    uneval_set = function(proto, name, func){
-        protos[protos.length] = [proto, name];
-        name2uneval[name] = func || uneval_default;
-    };
-    uneval_set(Array, 'array', function(o){
-        var src = [];
-        for (var i = 0, l = o.length; i < l; i++) 
-            src[i] = uneval(o[i]);
-        return '[' + src.toString() + ']';
-    });
-    uneval_set(RegExp, 'regexp', uneval_asis);
-    uneval_set(Date, 'date', function(o){
-        return '(new Date(' + o.valueOf() + '))';
-    });
-    var typeName = function(o){
-        // if (o === null) return 'null';
-        var t = typeof o;
-        if (t != 'object') return t;
-        // we have to lenear-search. sigh.
-        for (var i = 0, l = protos.length; i < l; i++) {
-            if (o instanceof protos[i][0]) return protos[i][1];
-        }
-        return 'object';
-    };
-    uneval = function(o, np){
-        // if (o.toSource) return o.toSource();
-        if (o === null) return 'null';
-        var func = name2uneval[typeName(o)] || uneval_default;
-        return func(o, np);
-    };
-}*/
+}
+
+
 if (typeof(this['clone']) !== 'function') {
     clone = function(o){
         try {
@@ -344,7 +286,7 @@ function serializePost(a, traditional){
                 }
             });
             
-        } else if (!traditional && obj != null && typeof obj === "object") {
+        } else if (!traditional && obj !== null && typeof obj === "object") {
             // Serialize object item.
             iterate(obj, function(k, v){
                 buildParams(prefix + "[" + k + "]", v);
