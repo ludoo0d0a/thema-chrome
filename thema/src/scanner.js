@@ -18,11 +18,11 @@ function autoIntall(){
     var source = window.location.href;
     if (/^https?:\/\/(www\.)?userscripts.org/.test(source)) {
         var l = $('#install_script a.userjs');
-        l.hide().after($('<a href="#" title="Install as tHema script" class="userjs">Install</a>').bind('click', function(e){
+		var url = l.attr('href');
+        l.hide().after($('<a href="'+url+'" title="Install as tHema script" class="userjs">Install</a>').bind('click', function(e){
             e.stopPropagation();
             var name = $('#details .title').text();
             if (confirm('Install tHema script :\n' + name + ' ?')) {
-                var url = l.attr('href');
                 var m = /(\d+).user.js$/.exec(url);
                 if (m && m[1]) {
                     var id = m[1];
@@ -36,6 +36,7 @@ function autoIntall(){
                     
                 }
             }
+			return false;
         }));
     }
 }
