@@ -4,42 +4,59 @@
  *
  */
 if (typeof GM_getValue === "undefined") {
-    GM_getValue = function(name, def){
-        var value,nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
-        for (var i = 0, c; i < ca.length; i++) {
-            c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEQ) === 0) {
-                value = unescape(c.substring(nameEQ.length, c.length));
-                break;
-            }
-        }
-        if (typeof value === 'undefined' && typeof def !== 'undefined') {
-            value = def;
-        }
-        return value;
-    };
+    if ($('#_virtual_storage')) {
+		GM_getValue = function(name, def){
+			var el = $('#_vs_get a[class="'+name+'"]');
+			if (el.length > 0) {
+				return el.html();
+			}else{
+				return def;
+			}
+		};
+	} else {
+		GM_getValue = function(name, def){
+			var value, nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
+			for (var i = 0, c; i < ca.length; i++) {
+				c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1, c.length);
+				}
+				if (c.indexOf(nameEQ) === 0) {
+					value = unescape(c.substring(nameEQ.length, c.length));
+					break;
+				}
+			}
+			if (typeof value === 'undefined' && typeof def !== 'undefined') {
+				value = def;
+			}
+			return value;
+		};
+	}
 }
 if (typeof GM_setValue === "undefined") {
-    GM_setValue = function(name, value, options){
-        options = (options || {});
-        if (options.expiresInOneYear) {
-            var today = new Date();
-            today.setFullYear(today.getFullYear() + 1, today.getMonth, today.getDay());
-            options.expires = today;
-        }
-        var curCookie = escape("_greasekit_" + name) +
-        "=" +
-        escape(value) +
-        ((options.expires) ? "; expires=" +
-        options.expires.toGMTString() : "") +
-        ((options.path) ? "; path=" + options.path : "") +
-        ((options.domain) ? "; domain=" + options.domain : "") +
-        ((options.secure) ? "; secure" : "");
-        document.cookie = curCookie;
-    };
+     if ($('#_virtual_storage')) {
+		GM_setValue = function(name, value){
+			$('#_vs_set').append('<a class="'+name+'">'+value+'</a>');
+		};
+	 } else {
+		GM_setValue = function(name, value, options){
+	 		options = options || {};
+	 		if (options.expiresInOneYear) {
+	 			var today = new Date();
+	 			today.setFullYear(today.getFullYear() + 1, today.getMonth, today.getDay());
+	 			options.expires = today;
+	 		}
+	 		var curCookie = escape("_greasekit_" + name) +
+	 		"=" +
+	 		escape(value) +
+	 		((options.expires) ? "; expires=" +
+	 		options.expires.toGMTString() : "") +
+	 		((options.path) ? "; path=" + options.path : "") +
+	 		((options.domain) ? "; domain=" + options.domain : "") +
+	 		((options.secure) ? "; secure" : "");
+	 		document.cookie = curCookie;
+	 	};
+	 }
 }
 if (typeof GM_deleteValue === "undefined") {
     GM_deleteValue = function(name){
