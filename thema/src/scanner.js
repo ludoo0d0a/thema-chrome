@@ -6,7 +6,7 @@ function checkProfiles(){
                 $.each(p.url, function(i, u){
                     var re = new RegExp(encodeRE(u));
                     if (re.test(url)) {
-                        //console.log('Apply profile ' + id + ' / ' + u);
+						//console.log('Apply profile ' + id + ' / ' + u);
                         applyProfile(p);
                     }
                 });
@@ -14,7 +14,6 @@ function checkProfiles(){
         });
     });
 }
-
 function autoIntall(){
     var source = window.location.href;
     if (/^https?:\/\/(www\.)?userscripts.org/.test(source)) {
@@ -41,7 +40,7 @@ function autoIntall(){
     }
 }
 function loadSettings(){
-	req('get', function(a){
+    req('get', function(a){
         if (a.value) {
             autoIntall();
         }
@@ -62,13 +61,23 @@ checkProfiles();
 function sendMessage(msg){
     /*if (port) {
     
+     
+    
      port.postMessage({
+    
+     
     
      message: 'info',
     
+     
+    
      text: msg
     
+     
+    
      });
+    
+     
     
      }*/
     
@@ -123,12 +132,12 @@ var mytabId;
 function applyProfile(options, tabId, cb){
     mytabId = tabId;
     var css = autoUpdate(options.css, false, function(css){
-		addStyle(css, 'thcss' || options.id, true);
-	});
-
+        addStyle(css, 'thcss' || options.id, true);
+    });
+    
     var js = autoUpdate(options.js, true, function(js){
-		addScript(js, 'thjs' || options.id, true, false, false, 300);
-	});
+        addScript(js, 'thjs' || options.id, true, false, false, 300);
+    });
 }
 
 function savepage(options, cb){

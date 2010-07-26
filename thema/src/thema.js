@@ -61,16 +61,16 @@ var aliases = {
     }]
 };
 
-var reRequire = /\/\/\s*@(\w+)\s*(.*)$/mg;
-var reRequireLine = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
+var reKeyword = /\/\/\s*@(\w+)\s*(.*)$/mg;
+var reKeywordParameters = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
 var scripts = 300;
 function autoUpdate(coda, asjs, cb){
-    var i = 0, rq, alias, code = coda, keywords = [];
-    while ((rq = reRequire.exec(code))) {
+    var i = 0, rq, alias, virtualStorage = false, code = coda, keywords = [];
+    while ((rq = reKeyword.exec(code))) {
         var key = rq[1];
         if (key === 'require') {
             var line = rq[2];
-            var m = reRequireLine.exec(line);
+            var m = reKeywordParameters.exec(line);
             var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
             console.log('require ' + url);
             //console.log(m);
@@ -85,10 +85,20 @@ function autoUpdate(coda, asjs, cb){
             }
         } else if (key === 'include') {
             //TODO....
+        } else if (key === 'storage') {
+            var line = rq[2];
+            var m = reKeywordParameters.exec(line);
+            var storage = m[1];
+			console.log('storage ' + storage);
+            virtualStorage = (storage === 'virtual');
         }
     }
     
-	//TODO replace loop using event event recursion
+    if (virtualStorage) {
+        initVirtualStorage();
+    }
+    
+    //TODO replace loop using event event recursion
     $.each(keywords, function(i, k){
         if (k.asjs) {
             //could be an alias
@@ -108,12 +118,12 @@ function autoUpdate(coda, asjs, cb){
     if (asjs) {
         code = 'window.tHema=window.tHema||{};\n' + code;
     }
-	
-	//TODO : replace timeout by previous looping on events
-	setTimeout(function(){
-		 cb(code);
-	},300);
-   
+    
+    //TODO : replace timeout by previous looping on events
+    setTimeout(function(){
+        cb(code);
+    }, 300);
+    
     //return code;
 }
 
@@ -317,4 +327,74 @@ function fixcode(code){
     //toSource
     //return code/.replace(/\.toSource\(\)/g,'');
     return code;
+}
+
+
+/**
+ * Virtual storage
+ */
+var initOnced = false;
+function initVirtualStorage(){
+    if (initOnced) {
+        return;
+    }
+    initOnced = true;
+    
+    //Create virtual storage placeholder
+    $('<div id="_vs" style="display:none;"><div id="_vs_set"></div><div id="_vs_get"></div></div>').appendTo($('body'));
+    
+    $('#_vs_set').bind('DOMNodeInserted', function(e){
+        /*if ($(e.target).attr('alt')!=='saved'){
+         setvalue(e.target.className, e.target.innerHTML);
+         $(e.target).attr('alt','saved');
+         }*/
+        var name = e.target.className;
+        setvalue(name, e.target.innerHTML);
+        setDOMvalueOnGet(name);
+        setTimeout(function(){
+            $(e.target).remove();
+        }, 1);
+    });
+    $('#_vs_get').bind('DOMNodeInserted', function(e){
+        setDOMvalueOnGet(e.target.className);
+    });
+    
+    
+    //Pooling now
+    dumpValues();
+    setInterval(dumpValues, 5000);
+}
+
+//update localstorage into DOM
+function dumpValues(){
+    $.each(localStorage, function(i, o){
+        var name = localStorage.key(i);
+        if (/^__vs_/.test(name)) {
+            setDOMvalueOnGet(name.replace(/^__vs_/, ''));
+        }
+    });
+}
+
+function setDOMvalueOnGet(name){
+    var el = $('#_vs_get a[class="' + name + '"]'), value = getvalue(name);
+    if (typeof value !== 'undefined') {
+        if (el.length > 0) {
+            el.html(value);
+        } else {
+            $('#_vs_get').append('<a class="' + name + '">' + value + '</a>');
+        }
+    }
+}
+
+var PREFIX_STORAGE = '__vs_';
+function setvalue(name, value){
+    var v = value;
+    if (typeof value === 'object') {
+        v = JSON.stringify(value);
+    }
+    localStorage.setItem(PREFIX_STORAGE + name, v);
+}
+function getvalue(name, defaut){
+    var value = localStorage.getItem(PREFIX_STORAGE + name);
+    return value || defaut;
 }

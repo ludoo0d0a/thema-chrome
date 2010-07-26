@@ -360,7 +360,7 @@ function savemyprofile(id, data){
         req('save', function(){
             $().message("Profile " + o.data.name + " saved!");
             $('#changed').hide();
-            loadCombo(id);
+			loadCombo(id);
         }, o);
     }
 }
