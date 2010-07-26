@@ -173,6 +173,7 @@
                     }
                     values[a.id] = a.data;
                     setvalue('profiles', values);
+					delvalue('js_'+a.data.name);
                     return true;
                 } else {
                     return false;
