@@ -54,3 +54,15 @@ where :
 Custom script inclusion could be using an URL : 
 //@require {url}
 //@require http://myserver.com/js/myscript.js
+
+=== @storage ===
+
+By default, storage is emulated usign cookies.
+But cookies are restricted on size.
+So scripts requiring much more space could use this alternative.
+
+//@storage virtual
+
+Technical details : 
+A hidden div is used to transfer data from Webpage DOM to/from extension content script.
+A polling is done to update data into DOM page.
