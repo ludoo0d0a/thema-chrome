@@ -179,7 +179,8 @@
                     return false;
                 }
             }
-            
+			
+			var reUserscript = /userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/;
             function adduserscript(a){
                 xhr({
                     url: a.url
@@ -193,17 +194,27 @@
                     '\n' +
                     '*/\n' +
                     '//@require greasekit\n' +
-                    '//@could-require jquery\n' +
-                    '//@require userscript ' +
-                    a.id +
-                    '\n';
-                    var text = xhr.responseText;
-                    var urls = extractUrls(text);
+                    '//@could-require jquery\n';
                     
+                    var text = xhr.responseText;
+                    var refs = extractRefs(text);
+					
+					$.each(refs.require, function(i,o){
+						var m = reUserscript.exec(o);
+						if (m && m[1]) {
+							code += '//@require userscript ' + m[1] + '\n';
+						}else{
+							code += '//@require ' + o + '\n';
+						}
+					});
+					
+					code+='//@require userscript ' + a.id + '\n';
+					
+					
                     saveprofile({
                         id: 'userscript' + a.id,
                         data: {
-                            url: urls,
+                            url: refs.include || '',
                             name: a.name,
                             js: code
                         }
@@ -221,16 +232,17 @@
                 callb(cb);
             }
             
-            var reRequire = /\/\/\s*@include\s*(.*)$/mg;
-            function extractUrls(text){
-                var rq, urls = [];
-                while ((rq = reRequire.exec(text))) {
-                    var line = rq[1];
-                    if (line) {
-                        urls.push(line);
+            var reRef = /\/\/\s*@(\w+)\s*(.*)$/mg;
+            function extractRefs(text){
+                var rq, refs = {};
+                while ((rq = reRef.exec(text))) {
+                    var key=rq[1],line=rq[2];
+					if (line) {
+                        refs[key]=refs[key]||[];
+						refs[key].push(line);
                     }
                 }
-                return urls;
+                return refs;
             }
             
             function getUid(prefix){

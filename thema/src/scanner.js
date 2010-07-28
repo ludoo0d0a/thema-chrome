@@ -3,13 +3,16 @@ function checkProfiles(){
         var url = window.location.href;
         $.each(profiles, function(id, p){
             if (p && p.url && !p.disabled) {
-                $.each(p.url, function(i, u){
+                for (var i = 0, len=p.url.length; i<len; i++){
+					var u = p.url[i];
                     var re = new RegExp(encodeRE(u));
                     if (re.test(url)) {
 						//console.log('Apply profile ' + id + ' / ' + u);
-                        applyProfile(p);
+                        p.id=p.id||id;
+						applyProfile(p);
+						break;
                     }
-                });
+                }
             }
         });
     });
@@ -51,38 +54,6 @@ function loadSettings(){
 }
 loadSettings();
 checkProfiles();
-
-/*
- var port = chrome.extension.connect({name: "popup_tHema"});
- chrome.extension.onRequest.addListener(
- function(request, sender, sendResponse) {
- sendResponse({counter: request.counter+1});
- });
- */
-function sendMessage(msg){
-    /*if (port) {
-    
-     
-    
-     port.postMessage({
-    
-     
-    
-     message: 'info',
-    
-     
-    
-     text: msg
-    
-     
-    
-     });
-    
-     
-    
-     }*/
-    
-}
 
 chrome.extension.onConnect.addListener(function(port){
     port.onMessage.addListener(function(a){
@@ -129,15 +100,16 @@ function replaceResources(files){
 }
 
 
-var mytabId;
+var mytabId,iid=50;
 function applyProfile(options, tabId, cb){
     mytabId = tabId;
+	options.id=options.id||iid++;
     var css = autoUpdate(options.css, false, function(css){
-        addStyle(css, 'thcss' || options.id, true);
+        addStyle(css, 'thcss_' + options.id, true);
     });
     
     var js = autoUpdate(options.js, true, function(js){
-        addScript(js, 'thjs' || options.id, true, false, false, 300);
+        addScript(js, 'thjs_' + options.id, true, false, false, 300);
     });
 }
 

@@ -2,12 +2,13 @@
 //Check @include in userscripts
 //store in cache, edit capabilities
 //add script userscript
-
+var debug = false;
 var aliases = {
     greasekit: {
         id: 'greasekit',
         js: getLocalScript('res/greasekit.js'),
-        cached: true
+        cached: !debug,
+		keepexisting:true
     },
     xwindow: {
         id: 'xwindow',
@@ -15,7 +16,8 @@ var aliases = {
     },
     userscript: {
         id: 'userscript$version',
-        js: 'http://userscripts.org/scripts/source/$version.user.js'
+        js: 'http://userscripts.org/scripts/source/$version.user.js',
+        cached: !debug
     },
     jquery: [{
         id: 'jq',
@@ -89,7 +91,7 @@ function autoUpdate(coda, asjs, cb){
             var line = rq[2];
             var m = reKeywordParameters.exec(line);
             var storage = m[1];
-			console.log('storage ' + storage);
+            console.log('storage ' + storage);
             virtualStorage = (storage === 'virtual');
         }
     }
@@ -205,7 +207,9 @@ function addStyle(styles, lid, astext, cb, cfg){
         var id = PREFIX + lid;
         var el = $('#' + id);
         if (el && el.length > 0) {
-            setval(el, styles, astext);
+            if (!cfg.once) {
+				setval(el, styles, astext);
+			}
         } else {
             if (astext) {
                 el = $('<style type="text/css"></style>');
@@ -246,6 +250,7 @@ function addStyle(styles, lid, astext, cb, cfg){
     }
 }
 
+var addedScripts = {};
 function addScript(scripts, lid, astext, cb, cfg){
     if (!scripts) {
         return;
@@ -262,16 +267,17 @@ function addScript(scripts, lid, astext, cb, cfg){
         o.tab = mytabId;
         req('addjs', cb, o);
     } else {
-        var id = PREFIX + lid;
+		var id = PREFIX + lid;
         var el = $('#' + id);
-        if (el && el.length > 0) {
-            if (cfg.keepexisting) {
+        if (addedScripts[lid] || (el && el.length > 0)) {
+			if (cfg.keepexisting) {
                 return;
             } else {
                 el.remove();
             }
         }
         
+		addedScripts[lid]=true;
         el = $('<script type="text/javascript"></script>');
         if (id) {
             el.attr('id', id);
@@ -304,15 +310,10 @@ function addScript(scripts, lid, astext, cb, cfg){
                     el.appendTo($('head'));
                 });
             } else {
-                if (cfg.defer) {
-                    setTimeout(function(){
-                        el.attr('src', fixcode(scripts));
-                        el.appendTo($('head'));
-                    }, cfg.defer || 0);
-                } else {
-                    el.attr('src', fixcode(scripts));
+                setTimeout(function(){
+                    el.attr('src', scripts);
                     el.appendTo($('head'));
-                }
+                }, cfg.defer || 0);
             }
         }
     }
@@ -320,7 +321,11 @@ function addScript(scripts, lid, astext, cb, cfg){
 
 
 function getLocalScript(path){
-    return chrome.extension.getURL(path) + '?' + Math.round(Math.random() * 9999 + 1);
+    var url = chrome.extension.getURL(path);
+	if (debug){
+		url += '?' + Math.round(Math.random() * 9999 + 1);
+	}
+	return url ;
 }
 
 function fixcode(code){
@@ -362,7 +367,7 @@ function initVirtualStorage(){
     
     //Pooling now
     dumpValues();
-    setInterval(dumpValues, 5000);
+    setInterval(dumpValues, 1000);
 }
 
 //update localstorage into DOM
@@ -375,13 +380,19 @@ function dumpValues(){
     });
 }
 
+var memcache = {};
 function setDOMvalueOnGet(name){
-    var el = $('#_vs_get a[class="' + name + '"]'), value = getvalue(name);
-    if (typeof value !== 'undefined') {
-        if (el.length > 0) {
-            el.html(value);
-        } else {
-            $('#_vs_get').append('<a class="' + name + '">' + value + '</a>');
+    var value = getvalue(name);
+	//no DOM change if no change 
+    if ((typeof memcache[name] === 'undefined') || (memcache[name] !== value)) {
+        var el = $('#_vs_get a[class="' + name + '"]');
+        if (typeof value !== 'undefined') {
+            if (el.length > 0) {
+                el.html(value);
+            } else {
+                $('#_vs_get').append('<a class="' + name + '">' + value + '</a>');
+            }
+            memcache[name] = value;
         }
     }
 }

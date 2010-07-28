@@ -131,7 +131,7 @@ function setbespin(id, config, title){
 }
 
 function settextarea(id, config, title){
-    editors[id] = $("<textarea class='ted'></textarea>");
+    editors[id] = $("<textarea class='ted' wrap='off'></textarea>");
     editors[id].bind('keyup', function(){
         ontextchanged(id);
     })
@@ -184,7 +184,7 @@ function formatComboData(profiles, selected){
     $.each(profiles, function(i, p){
         r.push({
             value: i,
-            text: p.name,
+            text: ((p.disabled)?'(x) ':'') + p.name,
             selected: (selected && selected === i)
         });
     });
