@@ -4,7 +4,7 @@
  *
  */
 if (typeof GM_getValue === "undefined") {
-    if ($('#_virtual_storage')) {
+    if ($('#_virtual_storage').length>0) {
 		GM_getValue = function(name, def){
 			var el = $('#_vs_get a[class="'+name+'"]');
 			if (el.length > 0) {
@@ -29,12 +29,15 @@ if (typeof GM_getValue === "undefined") {
 			if (typeof value === 'undefined' && typeof def !== 'undefined') {
 				value = def;
 			}
+			try {
+               value = JSON.parse(value);
+        	} catch (e) {}
 			return value;
 		};
 	}
 }
 if (typeof GM_setValue === "undefined") {
-     if ($('#_virtual_storage')) {
+     if ($('#_virtual_storage').length>0) {
 		GM_setValue = function(name, value){
 			$('#_vs_set').append('<a class="'+name+'">'+value+'</a>');
 		};
@@ -46,6 +49,8 @@ if (typeof GM_setValue === "undefined") {
 	 			today.setFullYear(today.getFullYear() + 1, today.getMonth, today.getDay());
 	 			options.expires = today;
 	 		}
+			value = JSON.stringify(value);
+			
 	 		var curCookie = escape("_greasekit_" + name) +
 	 		"=" +
 	 		escape(value) +
