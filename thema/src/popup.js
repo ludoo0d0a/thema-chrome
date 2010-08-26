@@ -156,8 +156,8 @@ function setcodemirror(id, config, title){
     cmeditors[id] = CodeMirror.fromTextArea(tid, config);
 }
 
-function ontextchanged(){
-    if (!editors[id]._textChanged) {
+function ontextchanged(id){
+	if (!editors[id]._textChanged) {
         $('#changed').show();
         editors[id]._textChanged = true;
     }

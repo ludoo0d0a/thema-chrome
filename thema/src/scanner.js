@@ -5,7 +5,7 @@ function checkProfiles(){
             if (p && p.url && !p.disabled) {
                 for (var i = 0, len=p.url.length; i<len; i++){
 					var u = p.url[i];
-                    var re = new RegExp(encodeRE(u));
+                    var re = new RegExp(encodeRE(u), "i");
                     if (re.test(url)) {
 						//console.log('Apply profile ' + id + ' / ' + u);
                         p.id=p.id||id;
