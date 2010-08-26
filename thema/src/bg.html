@@ -193,23 +193,30 @@
                     a.source +
                     '\n' +
                     '*/\n' +
+					'// ==tHema==\n'+
                     '//@require greasekit\n' +
                     '//@could-require jquery\n';
                     
                     var text = xhr.responseText;
                     var refs = extractRefs(text);
-					
-					$.each(refs.require, function(i,o){
-						var m = reUserscript.exec(o);
-						if (m && m[1]) {
-							code += '//@require userscript ' + m[1] + '\n';
-						}else{
-							code += '//@require ' + o + '\n';
-						}
-					});
+					if (refs.require) {
+						$.each(refs.require, function(i, o){
+							var m = reUserscript.exec(o);
+							if (m && m[1]) {
+								code += '//@require userscript ' + m[1] + '\n';
+							} else {
+								code += '//@require ' + o + '\n';
+							}
+						});
+					}
 					
 					code+='//@require userscript ' + a.id + '\n';
 					
+					if (refs.storage){
+						code+='//@storage '+refs.storage+'\n';
+					}
+					
+					code+='// ==/tHema==\n';
 					
                     saveprofile({
                         id: 'userscript' + a.id,

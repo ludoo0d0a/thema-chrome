@@ -2,7 +2,7 @@
 //Check @include in userscripts
 //store in cache, edit capabilities
 //add script userscript
-var debug = false;
+var debug = true;
 var aliases = {
     greasekit: {
         id: 'greasekit',
@@ -74,7 +74,7 @@ function autoUpdate(coda, asjs, cb){
             var line = rq[2];
             var m = reKeywordParameters.exec(line);
             var url = m[1], version = m[2], id = m[3], shortcut = m[4]; //could be an alias
-            console.log('require ' + url);
+            //console.log('require ' + url);
             //console.log(m);
             if (url) {
                 keywords.push({
@@ -91,7 +91,7 @@ function autoUpdate(coda, asjs, cb){
             var line = rq[2];
             var m = reKeywordParameters.exec(line);
             var storage = m[1];
-            console.log('storage ' + storage);
+            //console.log('storage ' + storage);
             virtualStorage = (storage === 'virtual');
         }
     }
@@ -364,7 +364,6 @@ function initVirtualStorage(){
         setDOMvalueOnGet(e.target.className);
     });
     
-    
     //Pooling now
     dumpValues();
     setInterval(dumpValues, 1000);
@@ -385,14 +384,14 @@ function setDOMvalueOnGet(name){
     var value = getvalue(name);
 	//no DOM change if no change 
     if ((typeof memcache[name] === 'undefined') || (memcache[name] !== value)) {
-        var el = $('#_vs_get a[class="' + name + '"]');
+        memcache[name] = JSON.stringify(value);
+		var el = $('#_vs_get a[class="' + name + '"]');
         if (typeof value !== 'undefined') {
-            if (el.length > 0) {
-                el.html(value);
+			if (el.length > 0) {
+                el.html(memcache[name]);
             } else {
-                $('#_vs_get').append('<a class="' + name + '">' + value + '</a>');
+                $('#_vs_get').append('<a class="'+name+'">'+memcache[name]+'</a>');
             }
-            memcache[name] = value;
         }
     }
 }
@@ -407,5 +406,10 @@ function setvalue(name, value){
 }
 function getvalue(name, defaut){
     var value = localStorage.getItem(PREFIX_STORAGE + name);
+	try{
+		value=JSON.parse(value);
+	}catch(e){
+		
+	}
     return value || defaut;
 }
