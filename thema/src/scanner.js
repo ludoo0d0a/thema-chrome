@@ -7,7 +7,7 @@ function checkProfiles(){
 					var u = p.url[i];
                     var re = new RegExp(encodeRE(u), "i");
                     if (re.test(url)) {
-						//console.log('Apply profile ' + id + ' / ' + u);
+						console.log('Apply profile ' + p.name + ' ['+id + '] on ' + u);
                         p.id=p.id||id;
 						applyProfile(p);
 						break;
