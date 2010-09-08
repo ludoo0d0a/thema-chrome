@@ -1,0 +1,24 @@
+<html>
+	
+	<head>
+		
+		<script>
+			
+			var re_encodeRE = new RegExp("[.+?|()\\[\\]{}\\\\]", "g"); // .+?|()[]{}\
+function encodeRE(s){
+    return s.replace(re_encodeRE, "\\$&").replace(/\s/g, '\\s').replace(/\*/g, '.*');
+}
+			var s= encodeRE('http://*.grepolis.com/*');
+			console.log(s);
+			
+			//for (var i = 0, len = buildings.length; i < len; i++) {
+			for (var ino = 1; ino < 8; ino++) {
+       console.log('ino='+ino);
+    }
+	
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>
