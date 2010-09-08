@@ -172,7 +172,7 @@ function absoluteUrl(url, urlpage){
 	
 	//remove 2 followings dots (upper dir)
 	while(/\.\.\//.test(u)){
-		u =u .replace(/\/[^/]*\/\.\./, '');
+		u =u.replace(/\/[^\/]*\/\.\./, '');
 	}
 	
     return u;
@@ -184,3 +184,15 @@ var re_encodeRE = new RegExp("[.+?|()\\[\\]{}\\\\]", "g"); // .+?|()[]{}\
 function encodeRE(s){
     return s.replace(re_encodeRE, "\\$&").replace(/\s/g, '\\s').replace(/\*/g, '.*');
 }
+
+jQuery.fn.slowEach = function( interval, callback ) { 
+        var array = this; 
+        if( ! array.length ) return; 
+        var i = 0; 
+        next(); 
+        function next() { 
+            if( callback.call( array[i], i, array[i] ) !== false ) 
+                if( ++i < array.length ) 
+                    setTimeout( next, interval ); 
+        } 
+}; 

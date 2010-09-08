@@ -2,13 +2,13 @@
 //Check @include in userscripts
 //store in cache, edit capabilities
 //add script userscript
-var debug = true;
+var debug = false;
 var aliases = {
     greasekit: {
         id: 'greasekit',
         js: getLocalScript('res/greasekit.js'),
         cached: !debug,
-		keepexisting:true
+        keepexisting: true
     },
     xwindow: {
         id: 'xwindow',
@@ -64,10 +64,12 @@ var aliases = {
 };
 
 var reKeyword = /\/\/\s*@(\w+)\s*(.*)$/mg;
-var reKeywordParameters = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
+var reKeywordParameters = /([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*([^\s]*)\s*(.*)/;
+var reCss = /\/\/@css_start\n\/*(.*)*\/\n\/\/@css_end/mg;
+var reCssUrl = /\/\/@css\s*(.*)/mg;
 var scripts = 300;
 function autoUpdate(coda, asjs, cb){
-    var i = 0, rq, alias, virtualStorage = false, code = coda, keywords = [];
+    var defertime = 200, i = 0, rq, alias, virtualStorage = false, code = coda, keywords = [];
     while ((rq = reKeyword.exec(code))) {
         var key = rq[1];
         if (key === 'require') {
@@ -77,22 +79,59 @@ function autoUpdate(coda, asjs, cb){
             //console.log('require ' + url);
             //console.log(m);
             if (url) {
+                var time = 0;
+                if (m[5]) {
+                    try {
+                        time = parseInt(m[5], 10);
+                    } catch (e) {
+                    }
+                }
                 keywords.push({
                     url: url,
                     version: version,
                     id: id,
                     shortcut: shortcut,
-                    asjs: asjs
+                    asjs: asjs,
+                    time: time
                 });
             }
         } else if (key === 'include') {
             //TODO....
+        } else if (key === 'defer') {
+            var time = rq[2];
+            try {
+                defertime = parseInt(time, 10);
+            } catch (e) {
+            }
+            
         } else if (key === 'storage') {
             var line = rq[2];
             var m = reKeywordParameters.exec(line);
             var storage = m[1];
             //console.log('storage ' + storage);
             virtualStorage = (storage === 'virtual');
+        } else if (key === 'css') {
+			//remote css
+			var rcu = reCssUrl.exec(rq[2]);
+			if (rcu && rcu[1]){
+				keywords.push({
+                    url: rcu[1],
+                    asjs: false,
+					astext:false
+                });
+			}
+		} else if (key === 'css_start') {
+            //local css
+			var rc = reCss.exec(code);
+			if (rc && rc[1]){
+				//var style= rc[1].replace(/[\r\n]/, '').replace(/^\/*/,'').replace(/*\/$/,'');
+				var style= rc[1].replace(/[\r\n]/, '');
+				keywords.push({
+                    url: style,
+                    asjs: false,
+					astext:true
+                });
+			}
         }
     }
     
@@ -101,7 +140,8 @@ function autoUpdate(coda, asjs, cb){
     }
     
     //TODO replace loop using event event recursion
-    $.each(keywords, function(i, k){
+    $(keywords).slowEach(defertime, function(i, k){
+        //$.each(keywords, function(i, k){
         if (k.asjs) {
             //could be an alias
             var alias = aliases[k.url];
@@ -112,10 +152,9 @@ function autoUpdate(coda, asjs, cb){
                 addScript(k.url, k.id);
             }
         } else {
-            addStyle(k.url, k.id);
+            addStyle(k.url, k.id, k.astext);
         }
     });
-    
     
     if (asjs) {
         code = 'window.tHema=window.tHema||{};\n' + code;
@@ -124,7 +163,7 @@ function autoUpdate(coda, asjs, cb){
     //TODO : replace timeout by previous looping on events
     setTimeout(function(){
         cb(code);
-    }, 300);
+    }, defertime);
     
     //return code;
 }
@@ -208,8 +247,8 @@ function addStyle(styles, lid, astext, cb, cfg){
         var el = $('#' + id);
         if (el && el.length > 0) {
             if (!cfg.once) {
-				setval(el, styles, astext);
-			}
+                setval(el, styles, astext);
+            }
         } else {
             if (astext) {
                 el = $('<style type="text/css"></style>');
@@ -267,17 +306,17 @@ function addScript(scripts, lid, astext, cb, cfg){
         o.tab = mytabId;
         req('addjs', cb, o);
     } else {
-		var id = PREFIX + lid;
+        var id = PREFIX + lid;
         var el = $('#' + id);
         if (addedScripts[lid] || (el && el.length > 0)) {
-			if (cfg.keepexisting) {
+            if (cfg.keepexisting) {
                 return;
             } else {
                 el.remove();
             }
         }
         
-		addedScripts[lid]=true;
+        addedScripts[lid] = true;
         el = $('<script type="text/javascript"></script>');
         if (id) {
             el.attr('id', id);
@@ -322,10 +361,10 @@ function addScript(scripts, lid, astext, cb, cfg){
 
 function getLocalScript(path){
     var url = chrome.extension.getURL(path);
-	if (debug){
-		url += '?' + Math.round(Math.random() * 9999 + 1);
-	}
-	return url ;
+    if (debug) {
+        url += '?' + Math.round(Math.random() * 9999 + 1);
+    }
+    return url;
 }
 
 function fixcode(code){
@@ -382,15 +421,15 @@ function dumpValues(){
 var memcache = {};
 function setDOMvalueOnGet(name){
     var value = getvalue(name);
-	//no DOM change if no change 
+    //no DOM change if no change 
     if ((typeof memcache[name] === 'undefined') || (memcache[name] !== value)) {
         memcache[name] = JSON.stringify(value);
-		var el = $('#_vs_get a[class="' + name + '"]');
+        var el = $('#_vs_get a[class="' + name + '"]');
         if (typeof value !== 'undefined') {
-			if (el.length > 0) {
+            if (el.length > 0) {
                 el.html(memcache[name]);
             } else {
-                $('#_vs_get').append('<a class="'+name+'">'+memcache[name]+'</a>');
+                $('#_vs_get').append('<a class="' + name + '">' + memcache[name] + '</a>');
             }
         }
     }
@@ -406,10 +445,10 @@ function setvalue(name, value){
 }
 function getvalue(name, defaut){
     var value = localStorage.getItem(PREFIX_STORAGE + name);
-	try{
-		value=JSON.parse(value);
-	}catch(e){
-		
-	}
+    try {
+        value = JSON.parse(value);
+    } catch (e) {
+    
+    }
     return value || defaut;
 }

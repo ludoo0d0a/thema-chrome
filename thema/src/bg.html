@@ -167,7 +167,7 @@
             
             function saveprofile(a){
                 var values = getProfiles();
-                if (a.data) {
+                if (a.data && !(/^<html>/.test(a.data))) {
                     if (!a.id) {
                         a.id = getPid(values);
                     }
@@ -232,7 +232,7 @@
             function clearcache(a, cb){
                 $.each(localStorage, function(i, o){
                     var name = localStorage.key(i);
-                    if (/^js_/.test(name)) {
+                    if (name && /^js_/.test(name)) {
                         delvalue(name);
                     }
                 });
