@@ -7,5 +7,6 @@
 	<buildSpec>
 	</buildSpec>
 	<natures>
+		<nature>com.aptana.ide.project.nature.web</nature>
 	</natures>
 </projectDescription>
