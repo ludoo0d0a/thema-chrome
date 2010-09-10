@@ -195,7 +195,7 @@ if (typeof GM_addScript === "undefined") {
         }
     };
 }
-if (typeof GM_addScript === "undefined") {
+if (typeof GM_addjs === "undefined") {
     GM_addjs = function(script, inline, id, cb, scope, time){
         var el = document.createElement("script");
         el.setAttribute("type", "text\/javascript");

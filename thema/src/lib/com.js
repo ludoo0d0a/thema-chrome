@@ -26,9 +26,17 @@ function _set(name, value, cb){
 
 
 function requesttext(url, cb){
+	var u = url;
+	if (/\?/.test(u)) {
+		u+='&';
+	}else{
+		u+='?';
+	}
+	u+= 'rnd='+Math.round(Math.random() * 9999 + 1);
+	
 	req('xhr', function(xhr){
 		cb(xhr.responseText);
-	}, {url:url});
+	}, {url:u});
 }
 
 /*
