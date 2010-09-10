@@ -69,7 +69,7 @@ var reCss = /\/\/@css_start\n\/*(.*)*\/\n\/\/@css_end/mg;
 var reCssUrl = /\/\/@css\s*(.*)/mg;
 var scripts = 300;
 function autoUpdate(coda, asjs, cb){
-    var defertime = 200, i = 0, rq, alias, virtualStorage = false, code = coda, keywords = [];
+    var defertime = 0, i = 0, rq, alias, virtualStorage = false, code = coda, keywords = [];
     while ((rq = reKeyword.exec(code))) {
         var key = rq[1];
         if (key === 'require') {
@@ -140,20 +140,23 @@ function autoUpdate(coda, asjs, cb){
     }
     
     //TODO replace loop using event event recursion
-    $(keywords).slowEach(defertime, function(i, k){
-        //$.each(keywords, function(i, k){
-        if (k.asjs) {
-            //could be an alias
-            var alias = aliases[k.url];
-            if (alias) {
-                alias.keepexisting = true;
-                addLibraries(alias, k.version, k.shortcut);
-            } else {
-                addScript(k.url, k.id);
-            }
-        } else {
-            addStyle(k.url, k.id, k.astext);
-        }
+    //$(keywords).slowEach(defertime, function(i, k){
+	$(keywords).each(function(i, k){
+        setTimeout(function(){
+			//$.each(keywords, function(i, k){
+	        if (k.asjs) {
+	            //could be an alias
+	            var alias = aliases[k.url];
+	            if (alias) {
+	                alias.keepexisting = true;
+	                addLibraries(alias, k.version, k.shortcut);
+	            } else {
+	                addScript(k.url, k.id);
+	            }
+	        } else {
+	            addStyle(k.url, k.id, k.astext);
+	        }
+		},k.time||0);
     });
     
     if (asjs) {
