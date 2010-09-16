@@ -3,66 +3,88 @@
  * Ensure compatibility for GreaseMonkey scripts
  *
  */
-var _vson=false;
-if (typeof GM_getValue === "undefined") {
-    GM_getValue = function(name, def){
-        var value;
-		if ($('#_vs').length > 0) {
-			var el = $('#_vs_get a[class="' + name + '"]');
-            if (el.length > 0) {
-                value= el.html();
-            } else {
-                value= def;
-            }
-        } else {
-            var nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
-            for (var i = 0, c; i < ca.length; i++) {
-                c = ca[i];
-                while (c.charAt(0) == ' ') {
-                    c = c.substring(1, c.length);
-                }
-                if (c.indexOf(nameEQ) === 0) {
-                    value = unescape(c.substring(nameEQ.length, c.length));
-                    break;
-                }
-            }
-            if (typeof value === 'undefined' && typeof def !== 'undefined') {
-                value = def;
-            }
-        }
-            try {
-                value = JSON.parse(value);
-            } catch (e) {
-            }
-            return value;
+var _vson = false;
+function GM_getValue(name, def){
+    //if ($('#_vs').length > 0) {
+    if (_vson) {
+        return GM_getValueVs(name, def);
+    } else {
+        return GM_getValueCookie(name, def);
     }
 }
-if (typeof GM_setValue === "undefined") {
-    GM_setValue = function(name, value, options){
-        if (typeof value === 'object') {
-                value = JSON.stringify(value);
+function GM_getValueCookie(name, def){
+    var value, nameEQ = escape("_greasekit_" + name) + "=", ca = document.cookie.split(';');
+    for (var i = 0, c; i < ca.length; i++) {
+        c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1, c.length);
         }
-		if ($('#_vs').length > 0) {
-            $('#_vs_set').append('<a class="' + name + '">' + value + '</a>');
-        } else {
-            options = options || {};
-            if (options.expiresInOneYear) {
-                var today = new Date();
-                today.setFullYear(today.getFullYear() + 1, today.getMonth, today.getDay());
-                options.expires = today;
-            }            
-            var curCookie = escape("_greasekit_" + name) +
-            "=" +
-            escape(value) +
-            ((options.expires) ? "; expires=" +
-            options.expires.toGMTString() : "") +
-            ((options.path) ? "; path=" + options.path : "") +
-            ((options.domain) ? "; domain=" + options.domain : "") +
-            ((options.secure) ? "; secure" : "");
-            document.cookie = curCookie;
+        if (c.indexOf(nameEQ) === 0) {
+            value = unescape(c.substring(nameEQ.length, c.length));
+            break;
         }
     }
+    if (typeof value === 'undefined' && typeof def !== 'undefined') {
+        value = def;
+    }
+    
+    try {
+        value = JSON.parse(value);
+    } catch (e) {
+    }
+    return value;
 }
+function GM_getValueVs(name, def){
+    var value, el = $('#_vs_get a[class="' + name + '"]');
+    if (el.length > 0) {
+        value = el.html();
+    } else {
+        value = def;
+    }
+    try {
+        value = JSON.parse(value);
+    } catch (e) {
+    }
+    return value;
+}
+
+function GM_setValue(name, value, options){
+    //if ($('#_vs').length > 0) {
+    if (_vson) {
+        GM_setValueVs(name, value, options);
+    } else {
+        GM_setValueCookie(name, value, options);
+    }
+}
+
+function GM_setValueVs(name, value, options){
+    $('#_vs_set').append('<a class="' + name + '">' + value + '</a>');
+}
+function GM_setValueCookie(name, value, options){
+    if (typeof value === 'object') {
+        value = JSON.stringify(value);
+    }
+    if ($('#_vs').length > 0) {
+        GM_setValueVs(name, value, options);
+    } else {
+        options = options || {};
+        if (options.expiresInOneYear) {
+            var today = new Date();
+            today.setFullYear(today.getFullYear() + 1, today.getMonth, today.getDay());
+            options.expires = today;
+        }
+        var curCookie = escape("_greasekit_" + name) +
+        "=" +
+        escape(value) +
+        ((options.expires) ? "; expires=" +
+        options.expires.toGMTString() : "") +
+        ((options.path) ? "; path=" + options.path : "") +
+        ((options.domain) ? "; domain=" + options.domain : "") +
+        ((options.secure) ? "; secure" : "");
+        document.cookie = curCookie;
+    }
+}
+
 if (typeof GM_deleteValue === "undefined") {
     GM_deleteValue = function(name){
     };
