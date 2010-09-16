@@ -88,13 +88,15 @@ function replaceResources(files){
         if (s.file) {
             document.write(s.code);
         } else {
-            if (s.type === 'js') {
-                console.log('Script : ' + id);
-                addjs(s.code, true, id);
-            } else {
-                console.log('Style : ' + id);
-                addcss(s.code, true, id);
-            }
+            if (s.code && !(/<html>.*unavailable/.test(s.code))){
+				if (s.type === 'js') {
+	                console.log('Script : ' + id);
+	                addjs(s.code, true, id);
+	            } else {
+	                console.log('Style : ' + id);
+	                addcss(s.code, true, id);
+	            }
+			}
         }
     });
 }
