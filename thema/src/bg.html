@@ -173,7 +173,10 @@
                     }
                     values[a.id] = a.data;
                     setvalue('profiles', values);
+					delvalue('js_'+a.id);
 					delvalue('js_'+a.data.name);
+					delvalue('css_'+a.id);
+					delvalue('css_'+a.data.name);
                     return true;
                 } else {
                     return false;
@@ -230,6 +233,7 @@
             }
             
             function clearcache(a, cb){
+                //for (i=0; i<=localStorage.length-1; i++)  {  
                 $.each(localStorage, function(i, o){
                     var name = localStorage.key(i);
                     if (name && /^js_/.test(name)) {
