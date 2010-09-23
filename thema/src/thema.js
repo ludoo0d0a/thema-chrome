@@ -17,6 +17,7 @@ var aliases = {
     userscript: {
         id: 'userscript$version',
         js: 'http://userscripts.org/scripts/source/$version.user.js',
+		mirror:['http://www.xeoos.fr/greasemonkey/mirror/$version.user.js',],
         cached: !debug
     },
     jquery: [{

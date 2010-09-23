@@ -19,7 +19,8 @@ function checkProfiles(){
 }
 function autoIntall(){
     var source = window.location.href;
-    if (/^https?:\/\/(www\.)?userscripts.org/.test(source)) {
+    if (/^https?:\/\/(www\.)?userscripts.org/.test(source) || 
+	/^https?:\/\/(www\.)?xeoos.fr\/greasemonkey/.test(source)) {
         var l = $('#install_script a.userjs');
 		var url = l.attr('href');
         l.hide().after($('<a href="'+url+'" title="Install as tHema script" class="userjs">Install</a>').bind('click', function(e){
