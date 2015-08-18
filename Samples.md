@@ -1,0 +1,84 @@
+# Introduction #
+
+A few samples of possibilites with tHema.
+
+
+### GoogleReader - Current items menu ###
+url:
+```
+https://www.google.com/reader/
+```
+
+js:
+```
+//@require jquery //
+tHema.onLoad = function(){
+if (jQuery('#_fm ul').length===0){
+        jQuery('<div id="_fm"><ul></ul></div>').appendTo(jQuery(document.body));
+}
+setInterval(function(){
+jQuery('.entry').each(function(){
+        if (!jQuery(this).attr('_fe')){
+                var l = jQuery(this).find('.entry-title-link');
+                jQuery('<li><a target="_blank" href="'+l.attr('href')+'">'+l.text()+'</a></li>').appendTo(jQuery('#_fm ul'));
+                jQuery(this).attr('_fe','1')
+        }
+});
+	   },200);
+}
+```
+
+css:
+```
+#_fm{
+position:absolute;
+top:10px;
+right:100px;
+width:350px;
+height:100px;
+overflow-y:auto;
+opacity:0.9;
+border:3px solid #2233aa;
+}
+#_fm ul{
+list-style-type:none;
+margin:0;
+padding:0;
+}
+```
+
+
+---
+
+
+
+
+### GoogleReader - Portal masonry-ed ###
+url:
+```
+https://www.google.com/reader/
+```
+
+js:
+```
+//@require jquery
+//@require http://desandro.com/_base/js/jquery.masonry.min.js
+jQuery('#entries').masonry({ itemSelector: '.entry:visible'}, function(){
+   $('#entries').css('height', '');
+});
+```
+
+css:
+```
+.entry{
+float:left !important;
+width:400px !important;
+}
+```
+
+
+---
+
+
+
+
